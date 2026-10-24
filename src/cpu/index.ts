@@ -4,14 +4,16 @@
 import type { GameState, Move } from '../game/types.ts';
 import { listLegalMoves } from './moves.ts';
 import type { CpuLevel } from './pending.ts';
-import { chooseEasy, chooseHard, chooseNormal, type HardOptions } from './strategies.ts';
+import { chooseEasy, chooseExpert, chooseHard, chooseNormal, type HardOptions } from './strategies.ts';
 
 export type { CpuLevel } from './pending.ts';
 export { resolvePending } from './pending.ts';
 export { applyMove, listLegalMoves } from './moves.ts';
 
 // 画面に出すCPUの名前（強さの順に Lv1〜3）
-export const CPU_LEVELS: Readonly<Record<CpuLevel, string>> = { easy: 'CPU Lv1', normal: 'CPU Lv2', hard: 'CPU Lv3' };
+export const CPU_LEVELS: Readonly<Record<CpuLevel, string>> = {
+  easy: 'CPU Lv1', normal: 'CPU Lv2', hard: 'CPU Lv3', expert: 'CPU Lv4',
+};
 
 /** 強さに応じて手を1つ選ぶ（合法手がなければ null） */
 export function chooseCpuMove(state: GameState, pi: number, level: CpuLevel, hardOpts?: HardOptions): Move | null {
@@ -19,5 +21,6 @@ export function chooseCpuMove(state: GameState, pi: number, level: CpuLevel, har
   if (moves.length === 0) return null;
   if (level === 'easy') return chooseEasy(moves);
   if (level === 'normal') return chooseNormal(state, pi, moves);
-  return chooseHard(state, pi, moves, hardOpts);
+  if (level === 'hard') return chooseHard(state, pi, moves, hardOpts);
+  return chooseExpert(state, pi, moves, hardOpts);
 }

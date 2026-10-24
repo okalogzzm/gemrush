@@ -7,7 +7,7 @@ import type { GameState, TokenColor } from '../game/types.ts';
 import { emptyCost, randomPick } from '../game/utils.ts';
 import { nobleProgress, planTargets } from './heuristics.ts';
 
-export type CpuLevel = 'easy' | 'normal' | 'hard';
+export type CpuLevel = 'easy' | 'normal' | 'hard' | 'expert';
 
 // トークン返却や貴族選択が残っていれば、CPUの判断で済ませる
 export function resolvePending(state: GameState, pi: number, level: CpuLevel): void {

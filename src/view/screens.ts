@@ -38,9 +38,12 @@ export function renderStartScreen(save: SaveData | null): void {
     </div>
     ${resume}
     <div class="start-label">対戦相手をえらぶ</div>
-    ${level('easy', 'green', CPU_LEVELS.easy, 'やさしい')}
-    ${level('normal', 'blue', CPU_LEVELS.normal, 'ふつう')}
-    ${level('hard', 'red', CPU_LEVELS.hard, '先を読む・手ごわい')}
+    <div class="level-grid">
+      ${level('easy', 'green', CPU_LEVELS.easy, 'やさしい')}
+      ${level('normal', 'blue', CPU_LEVELS.normal, 'ふつう')}
+      ${level('hard', 'red', CPU_LEVELS.hard, '手ごわい')}
+      ${level('expert', 'black', CPU_LEVELS.expert, '最強')}
+    </div>
     ${level('pvp', 'white', '2人で対戦', '同じ画面で交互に')}
     <button class="tut-btn" data-act="tutorial"><span class="tut-new">はじめての方へ</span><b>チュートリアル</b><small>実際に動かしながら遊び方をおぼえる</small></button>
     <button class="btn link-btn" data-act="rules">📖 ルール説明</button>

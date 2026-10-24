@@ -174,7 +174,7 @@ function onClick(e: MouseEvent): void {
   }
 }
 
-const isCpuLevel = (v: string): v is CpuLevel => v === 'easy' || v === 'normal' || v === 'hard';
+const isCpuLevel = (v: string): v is CpuLevel => v === 'easy' || v === 'normal' || v === 'hard' || v === 'expert';
 
 // 開始画面で強さを選んだとき
 function startGame(level: string): void {

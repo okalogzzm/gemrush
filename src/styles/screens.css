@@ -27,6 +27,11 @@
 .level-btn b { font-size: 1.05rem; white-space: nowrap; }
 .level-btn small { color: var(--muted); font-size: 0.8rem; text-align: right; }
 .level-btn .gem-shape { --gs: 24px; flex: none; }
+/* CPU Lv1〜4 は2列に並べて、開始画面を低く保つ（名前の下に短い説明） */
+.level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; }
+.level-grid .level-btn { margin: 0; padding: 6px 8px; gap: 8px; }
+.level-grid .level-btn > span { flex-direction: column; align-items: flex-start; gap: 0; }
+.level-grid .level-btn small { text-align: left; font-size: 0.75rem; }
 .resume-box {
   border: 1.5px solid var(--accent); border-radius: 12px; padding: 8px; margin: 10px 0 4px;
   background: rgba(224, 160, 32, 0.1); text-align: center;

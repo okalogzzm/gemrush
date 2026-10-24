@@ -87,18 +87,49 @@ export interface HardOptions {
   timeLimit?: number;
 }
 
-interface SearchContext { deadline: number; timedOut: boolean }
+/** 先読みの設定（強さごとに変える） */
+export interface SearchParams {
+  maxDepth: number;
+  timeLimit: number;
+  beam: number;
+  rootBeam: number;
+  /** 局面の評価（pi から見た有利さ） */
+  evaluate: (state: GameState, pi: number, viewer: number) => number;
+}
+
+const HARD_PARAMS: SearchParams = {
+  maxDepth: HARD.MAX_DEPTH, timeLimit: HARD.TIME_LIMIT, beam: HARD.BEAM, rootBeam: HARD.ROOT_BEAM, evaluate,
+};
+
+/**
+ * さいきょう（CPU Lv4）：つよいと同じ考え方で、5手先（自分→相手→自分→相手→自分）まで読む。
+ * 1手あたりの候補は少し絞って、そのぶん深く読む。
+ * 自動対戦で「つよい」に 129勝38敗3分（170戦）。考える時間はパソコンで平均約0.2秒
+ */
+export const EXPERT_PARAMS: SearchParams = { maxDepth: 5, timeLimit: 2000, beam: 7, rootBeam: 14, evaluate };
+
+interface SearchContext { deadline: number; timedOut: boolean; params: SearchParams }
 interface Child { move: Move; child: GameState; score: number }
 
 export function chooseHard(state: GameState, pi: number, moves: Move[], opts: HardOptions = {}): Move {
-  const ctx: SearchContext = { deadline: Date.now() + (opts.timeLimit ?? HARD.TIME_LIMIT), timedOut: false };
+  return searchBestMove(state, pi, moves, HARD_PARAMS, opts);
+}
+
+// ---------- さいきょう ----------
+export function chooseExpert(state: GameState, pi: number, moves: Move[], opts: HardOptions = {}): Move {
+  return searchBestMove(state, pi, moves, EXPERT_PARAMS, opts);
+}
+
+/** 先読みで一番良い手を選ぶ（つよい・さいきょう で共通） */
+export function searchBestMove(state: GameState, pi: number, moves: Move[], params: SearchParams, opts: HardOptions = {}): Move {
+  const ctx: SearchContext = { deadline: Date.now() + (opts.timeLimit ?? params.timeLimit), timedOut: false, params };
   // 山札の中身は分からないので、先読み用のコピーでは山札を混ぜ直す
   const root = cloneState(state, true);
-  const rootMoves = orderMoves(root, pi, HARD.ROOT_BEAM);
+  const rootMoves = orderMoves(root, pi, params.rootBeam, params);
   if (rootMoves.length === 0) return chooseNormal(state, pi, moves);
   let bestMove = rootMoves[0]!.move;
-  // 1手先 → 2手先 → 3手先 と、時間が許す限り深く読む
-  for (let depth = 1; depth <= HARD.MAX_DEPTH; depth++) {
+  // 1手先 → 2手先 → … と、時間が許す限り深く読む
+  for (let depth = 1; depth <= params.maxDepth; depth++) {
     let best = -Infinity;
     let bm: Move | null = null;
     for (const k of rootMoves) {
@@ -114,10 +145,11 @@ export function chooseHard(state: GameState, pi: number, moves: Move[], opts: Ha
 
 // 先読み本体：CPUの番は点数が最大、相手の番は最小になる手を選ぶと考える
 function search(state: GameState, depth: number, alpha: number, beta: number, pi: number, ctx: SearchContext): number {
-  if (depth === 0 || state.phase === 'gameover') return evaluate(state, pi, pi);
+  const { params } = ctx;
+  if (depth === 0 || state.phase === 'gameover') return params.evaluate(state, pi, pi);
   if (Date.now() > ctx.deadline) { ctx.timedOut = true; return 0; }
-  const kids = orderMoves(state, pi, HARD.BEAM);
-  if (kids.length === 0) return evaluate(state, pi, pi);
+  const kids = orderMoves(state, pi, params.beam, params);
+  if (kids.length === 0) return params.evaluate(state, pi, pi);
   if (state.current === pi) {
     let best = -Infinity;
     for (const k of kids) {
@@ -141,12 +173,12 @@ function search(state: GameState, depth: number, alpha: number, beta: number, pi
 }
 
 // 候補手を実際に試して、手番の人にとって良さそうな順に並べ、上位だけ残す
-function orderMoves(state: GameState, pi: number, limit: number): Child[] {
+function orderMoves(state: GameState, pi: number, limit: number, params: SearchParams): Child[] {
   const mover = state.current;
   let moves = listLegalMoves(state, { noDeck: true, hideHidden: mover !== pi });
   if (moves.length === 0) moves = listLegalMoves(state);
   return moves
-    .map(m => { const child = simulate(state, m); return { move: m, child, score: evaluate(child, mover, pi) }; })
+    .map(m => { const child = simulate(state, m); return { move: m, child, score: params.evaluate(child, mover, pi) }; })
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 }

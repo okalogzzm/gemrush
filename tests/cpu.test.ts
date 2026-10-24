@@ -10,13 +10,13 @@ import { randomPick } from '../src/game/utils.ts';
 import { makeCard, seededGame, totalCards, totalTokens } from './helpers.ts';
 
 /** 1ゲームを最後まで進める。levels[i] が null なら、ランダムな合法手 */
-function playOut(g: GameState, levels: (CpuLevel | null)[], check?: (g: GameState) => void): GameState {
+function playOut(g: GameState, levels: (CpuLevel | null)[], check?: (g: GameState) => void, timeLimit = 60_000): GameState {
   let turns = 0;
   while (g.phase !== 'gameover' && turns++ < 400) {
     const pi = g.current;
     const level = levels[pi] ?? null;
     const move = level
-      ? chooseCpuMove(g, pi, level, { timeLimit: 60_000 })
+      ? chooseCpuMove(g, pi, level, { timeLimit })
       : randomPick(listLegalMoves(g));
     assert.ok(move, '手が見つかる');
     assert.ok(checkMove(g, move).ok, `選んだ手が合法: ${JSON.stringify(move)}`);
@@ -69,6 +69,12 @@ describe('CPUの強さごと', () => {
     });
   }
 
+  // さいきょうは深く読むので時間がかかる。相手を easy にし、考える時間も短くして、合法手だけを確かめる
+  test('expert：最後まで合法手で遊び切れる', () => {
+    const g = playOut(seededGame(13), ['expert', 'easy'], undefined, 60);
+    assert.equal(g.phase, 'gameover');
+  });
+
   test('ふつう：買えるカードがあれば買う', () => {
     const g = seededGame(5);
     g.current = 1;
@@ -79,16 +85,18 @@ describe('CPUの強さごと', () => {
     assert.equal(m?.type, 'buy');
   });
 
-  test('つよい：15点に届く購入を見逃さない', () => {
-    const g = seededGame(6);
-    g.current = 1;
-    const p = g.players[1]!;
-    p.cards.push(makeCard('white', 12, { red: 1 }, 3));
-    g.board[3][2] = makeCard('green', 4, { blue: 1 }, 3);
-    p.tokens.blue = 1;
-    const m = chooseCpuMove(g, 1, 'hard', { timeLimit: 60_000 });
-    assert.deepEqual(m, { type: 'buy', src: { type: 'board', level: 3, index: 2 } });
-  });
+  for (const level of ['hard', 'expert'] as const) {
+    test(`${level}：15点に届く購入を見逃さない`, () => {
+      const g = seededGame(6);
+      g.current = 1;
+      const p = g.players[1]!;
+      p.cards.push(makeCard('white', 12, { red: 1 }, 3));
+      g.board[3][2] = makeCard('green', 4, { blue: 1 }, 3);
+      p.tokens.blue = 1;
+      const m = chooseCpuMove(g, 1, level, { timeLimit: 60_000 });
+      assert.deepEqual(m, { type: 'buy', src: { type: 'board', level: 3, index: 2 } });
+    });
+  }
 
   test('CPUは相手の伏せ札の中身を先読みに使わない（伏せ札を持っていても動ける）', () => {
     const g = seededGame(9);

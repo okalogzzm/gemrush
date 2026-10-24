@@ -5,7 +5,7 @@ Claude がこのリポジトリで作業するときのガイドです。くわ�
 ## プロジェクト概要
 
 - **Splender ～小鳥～**（旧名：ジェムラッシュ）：「宝石の煌き（Splendor）」の公式2人用ルールを元にした、オリジナルデザインのブラウザゲーム
-- CPU対戦（画面の表示は CPU Lv1／Lv2／Lv3、中では easy／normal／hard）と2人対戦（同じ画面で交互に操作）、チュートリアル
+- CPU対戦（画面の表示は CPU Lv1〜Lv4、中では easy／normal／hard／expert）と2人対戦（同じ画面で交互に操作）、チュートリアル
 - スマホのホーム画面に追加して、オフラインでも遊べる Web アプリ（PWA）
 - 公開先：https://okalogzzm.github.io/gemrush/ （GitHub Pages）
 - 技術：TypeScript ＋ esbuild（ビルド）＋ Node 標準のテスト機能。**実行時の外部ライブラリと画像以外の素材は使わない**（見た目はすべて CSS）
@@ -21,7 +21,7 @@ npm run typecheck    # 型チェック
 npm run build        # 公開用ファイルを dist/ に作る
 npm run preview      # dist/ を http://localhost:4173 で確認（オフライン動作も確認できる）
 npm run check        # 型チェック → テスト → ビルド をまとめて
-npm run bench -- hard normal 30   # CPUどうしの自動対戦で強さを確認
+npm run bench -- expert hard 30   # CPUどうしの自動対戦で強さを確認
 ```
 
 テストは1つだけ動かすこともできます：`node --test tests/rules.test.ts`
