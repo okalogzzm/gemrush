@@ -14,11 +14,13 @@ import { cardLabel, sameSource, tokensText } from '../game/utils.ts';
 import { validateCardData } from '../game/validate.ts';
 import { NEW_BADGE, cardBackHTML, cardHTML, gemShape, nobleHTML, tokenHTML } from './components.ts';
 import { $ } from './dom.ts';
+import { hideCardTip } from './tooltip.ts';
 
 /** 画面全体を描き直す */
 export function render(): void {
   const game = store.game;
   if (!game) return;
+  hideCardTip(); // 描き直すと元の要素がなくなるので、吹き出しは消す
   renderBanner(game);
   renderNobles(game);
   renderBank(game);
@@ -147,7 +149,8 @@ function renderSeat(game: GameState, pi: number, el: HTMLElement): void {
     if (discarding && p.tokens[c] > 0) {
       return `<button class="pcell can-discard" data-color="${c}" data-act="discard" aria-label="${JP[c]}を1個返す">${inner}</button>`;
     }
-    return `<div class="pcell" data-color="${c}" aria-label="${JP[c]} トークン${p.tokens[c]}個・ボーナス${c === 'gold' ? 0 : bonus[c]}">${inner}</div>`;
+    // カーソルを当てる（スマホはタップ）と、その色で買ったカードの一覧が出る（tooltip.ts）
+    return `<div class="pcell" data-color="${c}" data-pi="${pi}" data-tip data-act="cardsTip" aria-label="${JP[c]} トークン${p.tokens[c]}個・ボーナス${c === 'gold' ? 0 : bonus[c]}（タップで買ったカードを見る）">${inner}</div>`;
   }).join('');
 
   // 予約カード（手番の人は自分の予約カードをタップできる）。空き枠も出して、場所が動かないようにする
@@ -171,7 +174,7 @@ function renderSeat(game: GameState, pi: number, el: HTMLElement): void {
   el.className = `seat player p${pi} ${active ? 'active' : ''} ${myRecent ? 'just-moved' : ''}`;
   el.innerHTML = `<div class="ph">
       <span class="name">${p.name}</span>${active ? '<span class="turn-chip">手番</span>' : ''}${nobles}
-      <span class="pinfo"><span title="トークンの数（10個まで）">●${tokenCount(p)}/${RULES.MAX_TOKENS}</span><span title="買ったカードの枚数">▮${p.cards.length}枚</span></span>
+      <span class="pinfo"><span title="トークンの数（10個まで）">●${tokenCount(p)}/${RULES.MAX_TOKENS}</span><span class="p-cards" data-pi="${pi}" data-color="all" data-tip data-act="cardsTip" title="買ったカード（タップで一覧）">▮${p.cards.length}枚</span></span>
       <span class="pts ${glow}">${getPoints(p)}<small>点</small></span>
     </div>
     <div class="pbody"><div class="pgrid">${cells}</div><div class="reserved" aria-label="予約中のカード">${slots.join('')}</div></div>`;

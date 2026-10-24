@@ -15,6 +15,7 @@ import { $ } from '../view/dom.ts';
 import { playFx } from '../view/fx.ts';
 import { render, renderDataCheck } from '../view/render.ts';
 import { hideResult, showResult, showResultOnce } from '../view/result.ts';
+import { hideCardTip, initCardTip, showCardTip, toggleCardTip } from '../view/tooltip.ts';
 import { openMenu, openRules, renderStartScreen } from '../view/screens.ts';
 import { scheduleCpu, stopCpu } from './cpuRunner.ts';
 import { checkStorage, clearSave, loadSave, saveGame } from './save.ts';
@@ -98,7 +99,7 @@ function onTapCard(src: CardSource): void {
 
 // CPUの番でも使える操作（メニューや画面の切り替え）
 const ALWAYS_ALLOWED = [
-  'newgame', 'start', 'resume', 'rules', 'closeRules', 'menu', 'closeMenu', 'toStart', 'backdrop', 'log', 'closeLog', 'closeResult',
+  'newgame', 'start', 'resume', 'rules', 'closeRules', 'menu', 'closeMenu', 'toStart', 'backdrop', 'log', 'closeLog', 'closeResult', 'cardsTip',
 ];
 
 const toLevel = (v: string | undefined): Level => (v === '2' ? 2 : v === '3' ? 3 : 1);
@@ -107,6 +108,8 @@ const toLevel = (v: string | undefined): Level => (v === '2' ? 2 : v === '3' ? 3
 function onClick(e: MouseEvent): void {
   const target = e.target as HTMLElement | null;
   const el = target?.closest<HTMLElement>('[data-act]');
+  // 吹き出しは、ほかの所をタップしたら消す
+  if (el?.dataset.act !== 'cardsTip') hideCardTip();
   if (!el || (el as HTMLButtonElement).disabled) return;
   const d = el.dataset;
   // 重ねた画面の外側（暗い部分）をタップしたら閉じる
@@ -133,6 +136,8 @@ function onClick(e: MouseEvent): void {
     case 'closeLog':   $('#logScreen').hidden = true; break;
     case 'showResult': if (game) showResult(game); break;
     case 'closeResult': hideResult(); break;
+    // マウスはカーソルを当てた時点で出ているので、クリックで消さない
+    case 'cardsTip':   if ((e as PointerEvent).pointerType === 'mouse') showCardTip(el); else toggleCardTip(el); break;
     case 'bank':       onTapBank(d.color as TokenColor); break;
     case 'card':       onTapCard({ type: 'board', level: toLevel(d.level), index: Number(d.index) }); break;
     case 'deck':       onTapCard({ type: 'deck', level: toLevel(d.level) }); break;
@@ -195,6 +200,7 @@ function showStartScreen(): void {
 /** 起動 */
 export function init(): void {
   document.addEventListener('click', onClick);
+  initCardTip();
   renderDataCheck();
   checkStorage();
   showStartScreen();

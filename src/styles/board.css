@@ -53,8 +53,16 @@ button.noble.slim { min-height: 48px; }
 
 /* ===== 発展カード ===== */
 /* 3段を、使える高さいっぱいに等分する */
-#cardRows { display: grid; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: var(--gap); }
-.row { display: grid; grid-template-columns: minmax(0, 0.72fr) repeat(4, minmax(0, 1fr)); gap: var(--gap); min-height: 0; }
+/* 3段を、使える高さに等分する。ただし圧迫感が出ないよう、
+   左右に少し余白をとり、カードは縦長になりすぎない高さ（幅の約1.4倍まで）でとめて、3段をまとめて真ん中に置く */
+#cardRows {
+  --rg: calc(var(--gap) + 3px);
+  display: grid; grid-template-rows: repeat(3, auto); align-content: center; gap: var(--rg);
+  padding: 0 4%; container-type: size;
+}
+.row { display: grid; grid-template-columns: minmax(0, 0.72fr) repeat(4, minmax(0, 1fr)); gap: calc(var(--gap) + 2px); min-height: 0; }
+/* カードの高さ：3段が入る高さと、幅の1.4倍の小さい方。余った高さは3段の上下に分ける */
+#cardRows .card.fit, #cardRows .deck { height: min(calc((100cqh - 2 * var(--rg)) / 3), calc((100cqw - 40px) / 4.72 * 1.4)); }
 .card, .deck {
   position: relative; aspect-ratio: 3 / 4; border-radius: 10px; min-width: 0; overflow: hidden;
   font-size: clamp(10px, 2.9vw, 15px);
