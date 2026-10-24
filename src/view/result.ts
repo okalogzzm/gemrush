@@ -11,7 +11,8 @@ import { duckBgm } from '../audio/engine.ts';
 import { sfx } from '../audio/sfx.ts';
 import { COLORS } from '../game/constants.ts';
 import { getPoints } from '../game/rules.ts';
-import type { GameState, TokenColor } from '../game/types.ts';
+import type { GameState, GemColor, TokenColor } from '../game/types.ts';
+import { flyingBirdSVG } from './birds.ts';
 import { gemShape } from './components.ts';
 import { $ } from './dom.ts';
 import { reducedMotion } from './fx.ts';
@@ -51,7 +52,7 @@ export function showResult(game: GameState): void {
   const winner = w !== null ? game.players[w] : null;
   const calm = reducedMotion();
   // 勝敗の音を目立たせるため、そのあいだ BGM は小さくする
-  duckBgm(mood === 'win' ? 4 : 3);
+  duckBgm(mood === 'win' ? 6 : 3);
   sfx(mood);
 
   const title = mood === 'win' ? '勝利！' : mood === 'lose' ? '負けてしまった…' : '引き分け';
@@ -67,10 +68,14 @@ export function showResult(game: GameState): void {
       <div class="res-meta">カード${p.cards.length}枚・貴族${p.nobles.length}</div>
     </div>`).join('<div class="res-vs">VS</div>');
 
-  const party = mood === 'win' && !calm ? confetti(70) + fireworks(6) : mood === 'draw' && !calm ? fireworks(3) : '';
+  // 勝ったとき：紙吹雪・花火・小鳥の群れ。引き分けは花火だけ
+  const fw = mood === 'win' ? fireworks(10, 1.4) : fireworks(3, 1);
+  const party = calm || mood === 'lose' ? '' : mood === 'win' ? confetti(110) + fw.html : fw.html;
+  // 小鳥の群れは、箱の手前を横切る（押せないので、ボタンのじゃまにはならない）
+  const birds = mood === 'win' && !calm ? `<div class="res-party res-flock" aria-hidden="true">${flock(12)}</div>` : '';
   const trophy = mood === 'lose'
     ? `<div class="res-icon lose">${gemShape('blue')}</div>`
-    : `<div class="res-icon"><span class="res-crown"></span><span class="res-gems">${gemShape('red')}${gemShape('gold')}${gemShape('blue')}</span></div>`;
+    : `<div class="res-icon">${mood === 'win' && !calm ? `<span class="res-burst">${burst(28)}</span>` : ''}<span class="res-crown"></span><span class="res-gems">${gemShape('red')}${gemShape('gold')}${gemShape('blue')}</span></div>`;
 
   const el = $('#resultScreen');
   el.className = `overlay result ${mood}`;
@@ -87,10 +92,21 @@ export function showResult(game: GameState): void {
         <button class="btn primary big" data-act="newgame">もう一度遊ぶ</button>
         <button class="btn big" data-act="closeResult">盤面を見る</button>
       </div>
-    </div>`;
+    </div>
+    ${birds}`;
   el.hidden = false;
   el.scrollTop = 0;
   if (!calm) countUp(el);
+  if (!calm && mood !== 'lose') fireworkSounds(el, fw.times);
+}
+
+// 花火が開くのに合わせて「パーン」。勝敗の画面を閉じたら鳴らさない
+function fireworkSounds(root: HTMLElement, times: number[]): void {
+  for (const sec of times) {
+    for (let k = 0; k < FIREWORK_ROUNDS; k++) {
+      setTimeout(() => { if (!root.hidden) sfx('firework'); }, (sec + k * FIREWORK_SEC) * 1000);
+    }
+  }
 }
 
 // 得点の数字を 0 から数え上げる
@@ -124,18 +140,52 @@ function confetti(n: number): string {
   return s;
 }
 
-// 花火：画面のあちこちで、光の粒が丸く広がる（くり返し）
-function fireworks(n: number): string {
+// 花火1回の長さと、くり返す回数（result.css の .firework i と同じ）。
+// ずっとくり返すとスマホが熱くなるので、回数を決めておく
+const FIREWORK_SEC = 2.4;
+const FIREWORK_ROUNDS = 3;
+
+// 花火：画面のあちこちで、光の粒が丸く広がる。times は開く時刻（秒）
+function fireworks(n: number, size: number): { html: string; times: number[] } {
+  const times: number[] = [];
   const hues = ['255, 211, 110', '120, 200, 255', '255, 120, 140', '140, 255, 180', '220, 160, 255'];
   let s = '';
   for (let i = 0; i < n; i++) {
     const x = (10 + Math.random() * 80).toFixed(0);
     const y = (8 + Math.random() * 45).toFixed(0);
-    const delay = (i * 0.45 + Math.random() * 0.3).toFixed(2);
+    const delay = (0.3 + i * 0.4 + Math.random() * 0.3).toFixed(2);
+    times.push(Number(delay));
     const rgb = hues[i % hues.length]!;
     let sparks = '';
     for (let k = 0; k < 18; k++) sparks += `<i style="--a:${k * 20}deg"></i>`;
-    s += `<span class="firework" style="left:${x}%;top:${y}%;--delay:${delay}s;--rgb:${rgb}">${sparks}</span>`;
+    s += `<span class="firework" style="left:${x}%;top:${y}%;--delay:${delay}s;--rgb:${rgb};--fs:${size}">${sparks}</span>`;
+  }
+  return { html: s, times };
+}
+
+// 小鳥の群れ：いろいろな色の鳥が、右から左へ羽ばたいて横切っていく（2回に分けて）
+const FLOCK: [GemColor, number][] = [['blue', 2], ['red', 1], ['green', 1], ['white', 1], ['red', 3], ['blue', 1], ['green', 3], ['black', 3], ['white', 2], ['blue', 3], ['red', 2], ['green', 2]];
+function flock(n: number): string {
+  let s = '';
+  for (let i = 0; i < n; i++) {
+    const [c, lv] = FLOCK[i % FLOCK.length]!;
+    const y = (6 + Math.random() * 70).toFixed(0);
+    const size = Math.round(46 + Math.random() * 40);
+    const dur = (3.2 + Math.random() * 2).toFixed(2);
+    const delay = ((i < n / 2 ? 0.6 : 3.4) + Math.random() * 1.6).toFixed(2);
+    const wave = Math.round(20 + Math.random() * 40);
+    s += `<span class="res-bird" style="--y:${y}vh;--w:${size}px;--dur:${dur}s;--delay:${delay}s;--wave:${wave}px">${flyingBirdSVG(c, lv)}</span>`;
+  }
+  return s;
+}
+
+// 王冠のうしろで、光の粒が大きく飛び散る
+function burst(n: number): string {
+  let s = '';
+  for (let i = 0; i < n; i++) {
+    const a = Math.round((i / n) * 360 + Math.random() * 10);
+    const d = Math.round(110 + Math.random() * 120);
+    s += `<i class="spark" style="--a:${a}deg;--d:${d}px;--t:${(0.35 + Math.random() * 0.25).toFixed(2)}s"></i>`;
   }
   return s;
 }

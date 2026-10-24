@@ -128,3 +128,23 @@
   .tut-focus { outline-color: #f0a000 !important; }
   #message.show { opacity: 1; }
 }
+
+/* ===== カードを買ったとき：小鳥がカードの枝まで飛んできて、とまる ===== */
+.fx-bird { position: fixed; z-index: 46; display: flex; pointer-events: none; will-change: transform; }
+.bird-fly { display: block; width: 100%; height: 100%; }
+.bird-fly svg { display: block; width: 100%; height: 100%; overflow: visible; }
+/* つばさを肩のところで上下にたたむ（羽ばたき） */
+.bird-fly .wing { transform-origin: 52px 40px; animation: flap 0.18s ease-in-out infinite alternate; }
+.bird-fly .wing.far { animation-delay: -0.04s; }
+/* 着く直前は、羽ばたきをゆっくりにして舞い降りる */
+.fx-bird.gliding .wing { animation-duration: 0.32s; }
+@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(-0.5); } }
+/* 鳥が来るまで、カードは枝と葉だけ */
+.fx-ann .await-bird .card-bird .bl-back, .fx-ann .await-bird .card-bird .bl-front { opacity: 0; }
+/* とまった瞬間、枝が少ししなるように、はずむ */
+.fx-ann .bird-landed .card-bird { animation: perch 0.5s cubic-bezier(.3, 1.5, .5, 1); }
+@keyframes perch {
+  0% { transform: translateY(-12%) scale(1.06); }
+  45% { transform: translateY(3%) scaleY(0.92); }
+  100% { transform: none; }
+}

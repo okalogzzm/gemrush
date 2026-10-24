@@ -17,6 +17,7 @@ import { settings, type Fx } from '../app/state.ts';
 import { sfx } from '../audio/sfx.ts';
 import { JP } from '../game/constants.ts';
 import type { Card, GameState, TokenColor } from '../game/types.ts';
+import { flyingBirdSVG } from './birds.ts';
 import { cardBackHTML, cardHTML, nobleHTML, tokenHTML } from './components.ts';
 import { $ } from './dom.ts';
 
@@ -112,6 +113,53 @@ function ringAt(r: DOMRect | null, color = '255, 230, 140'): void {
   el.style.setProperty('--rgb', color);
 }
 
+/**
+ * 小鳥が画面の右上の外から羽ばたいて飛んできて、大きなカードの枝にとまる。
+ * delay：飛び始める時刻、ms：飛んでいる時間
+ */
+function birdArrives(ann: HTMLElement, card: Pick<Card, 'color' | 'level'>, delay: number, ms: number): void {
+  const big = ann.querySelector<HTMLElement>('.fx-big-card');
+  // 何かあっても、最後には必ず鳥がとまった姿にする
+  const land = (): void => {
+    if (!big?.classList.contains('await-bird')) return;
+    big.classList.remove('await-bird');
+    big.classList.add('bird-landed');
+  };
+  later(delay, () => {
+    const perch = rectOf(big?.querySelector('.card-bird'));
+    if (!perch) { land(); return; }
+    const el = document.createElement('div');
+    el.className = 'fx-bird';
+    el.innerHTML = flyingBirdSVG(card.color, card.level);
+    // 羽を広げているので、とまった絵より少し横に大きく
+    const w = perch.width * 1.15;
+    const h = perch.height * 0.8;
+    const x = perch.left + (perch.width - w) / 2;
+    const y = perch.top + (perch.height - h) / 2 - perch.height * 0.08;
+    Object.assign(el.style, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px` });
+    $('#fxLayer').appendChild(el);
+    // 右上の外 → 少し下がりながら近づく → 枝の少し上でふわっと止まる → とまる
+    const sx = window.innerWidth - x + 30;
+    const sy = -(y + h) - 20;
+    const anim = el.animate([
+      { transform: `translate(${sx}px, ${sy}px) scale(0.6) rotate(-12deg)` },
+      { transform: `translate(${sx * 0.45}px, ${sy * 0.12 + 36}px) scale(0.9) rotate(6deg)`, offset: 0.55 },
+      { transform: 'translate(12px, -20px) scale(1.04) rotate(-8deg)', offset: 0.86 },
+      { transform: 'translate(0, 0) scale(1) rotate(0deg)' },
+    ], { duration: ms, easing: 'cubic-bezier(.3, .1, .3, 1)', fill: 'forwards' });
+    sfx('flap', { ms: ms * 0.85 });
+    later(ms * 0.75, () => el.classList.add('gliding'));
+    anim.onfinish = () => {
+      el.remove();
+      land();
+      sfx('birdLand');
+      ringAt(perch);
+    };
+    later(ms + 400, () => { el.remove(); land(); });
+  });
+  later(delay + ms + 600, land);
+}
+
 function cardSlot(fx: Fx): DOMRect | null {
   const src = fx.src;
   if (!src) return null;
@@ -152,27 +200,31 @@ export function playFx(fx: Fx | null, game: GameState): number {
 
   if (card) {
     // ===== カードを買った =====
+    // 大きなカードは、はじめ枝と葉だけ。そこへ小鳥が飛んできてとまる
     const pts = card.points ? `<div class="fx-pts">+${card.points}点</div>` : '';
-    const dur = 1500 * k;
-    spawnFx(`<div class="fx-ann p${fx.pi}" style="--dur:${dur}ms">${who}
+    const dur = 2800 * k;
+    const away = dur * 0.62;  // 大きなカードが消え始めて、カードが手元へ飛んでいく時刻
+    const ann = spawnFx(`<div class="fx-ann p${fx.pi}" style="--dur:${dur}ms">${who}
         <div class="fx-what">カードを購入！</div>
-        <div class="fx-items">${sparkles(16)}${cardHTML(card, { cls: 'fx-shine fx-big-card', tag: 'div' })}</div>
+        <div class="fx-items">${sparkles(16)}${cardHTML(card, { cls: 'fx-shine fx-big-card await-bird', tag: 'div' })}</div>
         <div class="fx-note">${JP[card.color]}のボーナス +1</div>${pts}
       </div>`, dur, 'fx-center');
     sfx('buy');
-    if (fx.spent.length) sfx('returnGem', { delayMs: dur * 0.6 });
+    // 大きなカードが出そろってから（annIn の 20%）、鳥が飛んでくる
+    birdArrives(ann, card, dur * 0.2, 850 * k);
+    if (fx.spent.length) sfx('returnGem', { delayMs: away });
     const from = cardSlot(fx);
     const bonusEl = seatCell(fx.pi, card.color, '.bonus-card');
-    fly(cardHTML(card, { tag: 'div', cls: 'fit' }), from, rectOf(bonusEl), dur * 0.6, 700 * k, () => {
+    fly(cardHTML(card, { tag: 'div', cls: 'fit' }), from, rectOf(bonusEl), away, 700 * k, () => {
       sfx('cardLand');
       landFlash(bonusEl);
       ringAt(rectOf(bonusEl));
     });
     // 払った宝石が場に戻っていく
     fx.spent.forEach((c, i) => {
-      fly(tokenHTML(c), rectOf(seatCell(fx.pi, c, '.tok')), bankTok(c), dur * 0.6 + 60 * i, 650 * k);
+      fly(tokenHTML(c), rectOf(seatCell(fx.pi, c, '.tok')), bankTok(c), away + 60 * i, 650 * k);
     });
-    t = dur * 0.6 + 700 * k;
+    t = away + 700 * k;
   } else if (fx.reserved) {
     // ===== カードを予約した =====
     const r = fx.reservedCards[0];

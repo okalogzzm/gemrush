@@ -47,7 +47,15 @@ async function wake(): Promise<void> {
     try { ctx = new Ctx(); } catch { return; }
     seBus = ctx.createGain();
     seBus.gain.value = sound.se ? SE_VOL : 0;
-    seBus.connect(ctx.destination);
+    // たくさんの音が重なっても（勝ったときなど）音が割れないように、大きすぎる所だけ抑える
+    const limit = ctx.createDynamicsCompressor();
+    limit.threshold.value = -10;
+    limit.knee.value = 6;
+    limit.ratio.value = 8;
+    limit.attack.value = 0.003;
+    limit.release.value = 0.2;
+    seBus.connect(limit);
+    limit.connect(ctx.destination);
     bgmBus = ctx.createGain();
     bgmBus.gain.value = 0;
     bgmBus.connect(ctx.destination);

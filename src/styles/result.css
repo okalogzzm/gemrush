@@ -18,23 +18,45 @@
   position: fixed; left: 50%; top: 38%; width: 240vmax; height: 240vmax; margin: -120vmax 0 0 -120vmax; pointer-events: none;
   background: repeating-conic-gradient(from 0deg, rgba(255, 205, 90, 0.35) 0deg 9deg, transparent 9deg 22deg);
   -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 45%); mask-image: radial-gradient(circle, #000 0%, transparent 45%);
-  animation: rays 14s linear infinite, fadeIn 1s ease-out both;
+  animation: rays 14s linear 2, fadeIn 1s ease-out both;
 }
 .result.draw .res-rays { background: repeating-conic-gradient(from 0deg, rgba(170, 180, 255, 0.16) 0deg 9deg, transparent 9deg 22deg); }
 
-/* 紙吹雪と花火 */
+/* 紙吹雪と花火。ずっと動き続けるとスマホが熱くなるので、回数を決めて止める */
 .res-party { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.res-flock { z-index: 3; }
 .confetti {
   position: absolute; left: var(--x); top: -30px;
-  animation: fall var(--dur) linear var(--delay) infinite;
+  animation: fall var(--dur) linear var(--delay) 3;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
 }
 .firework { position: absolute; width: 0; height: 0; }
 .firework i {
   position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; opacity: 0;
   background: rgb(var(--rgb)); box-shadow: 0 0 10px rgb(var(--rgb)), 0 0 20px rgb(var(--rgb));
-  animation: burst 2.4s ease-out var(--delay) infinite;
+  animation: burst 2.4s ease-out var(--delay) 3;
 }
+/* 勝ったときの花火は、大きく広がる（--fs 倍） */
+.result.win .firework i { width: 10px; height: 10px; left: -5px; top: -5px; }
+
+/* 小鳥の群れ：右から左へ、波打ちながら横切る（result.ts の flock） */
+.res-bird {
+  position: absolute; left: 0; top: var(--y); width: var(--w); height: calc(var(--w) * 0.6);
+  animation: crossSky var(--dur) linear var(--delay) both;
+  filter: drop-shadow(0 4px 4px rgba(30, 70, 100, 0.25));
+}
+.res-bird .bird-fly .wing { animation: flap 0.2s ease-in-out var(--delay) 40 alternate; }
+@keyframes crossSky {
+  0% { transform: translate(105vw, 0); }
+  25% { transform: translate(72vw, calc(var(--wave) * -1)); }
+  50% { transform: translate(40vw, 0); }
+  75% { transform: translate(8vw, calc(var(--wave) * -1)); }
+  100% { transform: translate(-30vw, 0); }
+}
+
+/* 王冠のうしろで飛び散る光の粒 */
+.res-burst { position: absolute; left: 50%; top: 40%; width: 0; height: 0; z-index: -1; }
+.res-burst .spark { width: 18px; height: 18px; margin: -9px; animation-duration: 1.3s; }
 
 /* 真ん中の箱 */
 .res-box {
@@ -44,6 +66,9 @@
   box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.6), 0 0 60px rgba(255, 200, 80, 0.6), 0 20px 50px rgba(30, 70, 100, 0.35);
   animation: boxIn 0.9s cubic-bezier(.2, 1.4, .4, 1) both;
 }
+/* 勝ったとき：「勝利！」の文字が着いた瞬間に、箱がドンとはずむ（太鼓の音と同じころ） */
+.result.win .res-box { animation: boxIn 0.9s cubic-bezier(.2, 1.4, .4, 1) both, thump 0.5s ease-out 1.15s; }
+@keyframes thump { 0% { transform: none; } 30% { transform: scale(1.05) rotate(-1deg); } 60% { transform: scale(0.98) rotate(0.6deg); } 100% { transform: none; } }
 .result.lose .res-box { border-color: #9fb4cc; box-shadow: 0 20px 50px rgba(30, 70, 100, 0.3); }
 
 /* トロフィー（王冠と宝石） */
@@ -53,10 +78,10 @@
   clip-path: polygon(0 100%, 0 22%, 22% 58%, 50% 0, 78% 58%, 100% 22%, 100% 100%);
   background: linear-gradient(#fff8d0, #ffd36e 40%, #f0b429 70%, #855400);
   filter: drop-shadow(0 0 18px rgba(255, 211, 110, 0.9));
-  animation: crownGlow 1.6s ease-in-out 1.2s infinite;
+  animation: crownGlow 1.6s ease-in-out 1.2s 5;
 }
 .res-gems { display: flex; gap: 6px; margin-top: -10px; }
-.res-gems .gem-shape { --gs: 26px; animation: float 2.4s ease-in-out infinite; }
+.res-gems .gem-shape { --gs: 26px; animation: float 2.4s ease-in-out 4; }
 .res-gems .gem-shape:nth-child(2) { --gs: 34px; animation-delay: -0.8s; }
 .res-gems .gem-shape:nth-child(3) { animation-delay: -1.6s; }
 .res-icon.lose { margin-top: 0; }
@@ -68,7 +93,7 @@
   background-size: 250% 100%;
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 2px 0 #fff) drop-shadow(0 0 12px rgba(255, 200, 80, 0.8));
-  animation: titleIn 0.8s cubic-bezier(.2, 1.6, .4, 1) 0.4s both, shimmer 2.4s linear 1.2s infinite;
+  animation: titleIn 0.8s cubic-bezier(.2, 1.6, .4, 1) 0.4s both, shimmer 2.4s linear 1.2s 4;
 }
 .result.lose .res-title { font-size: clamp(1.8rem, 9vw, 2.4rem); background: linear-gradient(180deg, #5f86b8, #2f4f7a); -webkit-background-clip: text; background-clip: text; filter: none; animation: fadeUp 0.8s ease-out 0.2s both; }
 .result.draw .res-title { background: linear-gradient(100deg, #6a78c0, #8e6ac0, #c9b8ff, #8e6ac0, #6a78c0); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; }
@@ -106,8 +131,8 @@
   0% { transform: rotate(var(--a)) translateX(0) scale(1.4); opacity: 0; }
   5% { opacity: 1; }
   45% { opacity: 1; }
-  60% { transform: rotate(var(--a)) translateX(90px) translateY(12px) scale(0.6); opacity: 0; }
-  100% { transform: rotate(var(--a)) translateX(90px) scale(0); opacity: 0; }
+  60% { transform: rotate(var(--a)) translateX(calc(90px * var(--fs, 1))) translateY(12px) scale(0.6); opacity: 0; }
+  100% { transform: rotate(var(--a)) translateX(calc(90px * var(--fs, 1))) scale(0); opacity: 0; }
 }
 @keyframes boxIn { 0% { transform: scale(0.5) translateY(40px); opacity: 0; } 100% { transform: none; opacity: 1; } }
 @keyframes trophy { 0% { transform: translateY(-80px) scale(0.3) rotate(-20deg); opacity: 0; } 100% { transform: none; opacity: 1; } }

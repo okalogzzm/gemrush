@@ -219,3 +219,50 @@ ${s.eyeRing ? `<circle cx="37.5" cy="21.5" r="3.9" fill="${s.eyeRing}"/>` : ''}
 
   return `<span class="bird3d" data-bird="${color}${level}-${seed}" aria-hidden="true">${back}${mid}${front}</span>`;
 }
+
+// 飛んでいる姿のくちばしの長さ（とまっている絵と、だいたい同じ見た目にする）
+const FLY_BEAK: Record<Beak, number> = { cone: 7, thin: 9, dagger: 17, hook: 9 };
+
+/**
+ * 羽を広げて飛んでいる鳥の絵（カードを買ったとき、カードの枝まで飛んでくる）。
+ * 色は、とまっている絵と同じ鳥にそろえる。左向き。
+ * 2枚のつばさは CSS（fx.css の .bird-fly）で上下に羽ばたかせる
+ */
+export function flyingBirdSVG(color: GemColor, level: number): string {
+  const s = SPECIES[color][Math.min(3, Math.max(1, level)) - 1]!;
+  const p = `f${(serial++).toString(36)}`;
+  const body = 'M22,40 C22,32 30,30 36,32 C48,34 70,34 84,40 C78,48 62,56 46,56 C34,56 24,50 22,40 Z';
+  const tx = 82 + s.tailLen * 0.5;
+  const tail = `M80,39 L${tx.toFixed(1)},33 L${(tx + 2).toFixed(1)},43 L${(tx - 4).toFixed(1)},46 L78,47 Z`;
+  const bl = FLY_BEAK[s.beak];
+  const wing = 'M44,40 C40,24 50,8 70,2 C68,10 74,12 80,10 C74,22 66,32 60,40 Z';
+  const streamers = s.tailLen > 45
+    ? `<path d="M84,42 Q100,52 ${(tx + 10).toFixed(1)},50" stroke="${s.tail}" stroke-width="2.2" fill="none" stroke-linecap="round"/>` : '';
+  return `<span class="bird-fly" aria-hidden="true"><svg viewBox="0 -4 ${Math.max(120, tx + 14).toFixed(0)} 72" preserveAspectRatio="xMidYMid meet">
+<defs>
+<linearGradient id="${p}w" x1="0" y1="1" x2=".6" y2="0"><stop offset="0" stop-color="${s.wing}"/><stop offset=".55" stop-color="${s.wing}"/><stop offset="1" stop-color="${s.primaries}"/></linearGradient>
+<linearGradient id="${p}sd" x1="0" y1="0" x2="0" y2="1"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>
+<clipPath id="${p}c"><path d="${body}"/><circle cx="30" cy="40" r="11"/></clipPath>
+</defs>
+<g class="wing far"><path d="${wing}" fill="${s.primaries}" opacity=".85" transform="translate(7,-1)"/></g>
+${streamers}
+<path d="${tail}" fill="${s.tail}"/>
+<path d="${body}" fill="${s.back}"/><circle cx="30" cy="40" r="11" fill="${s.crown ?? s.back}"/>
+<g clip-path="url(#${p}c)">
+<ellipse cx="48" cy="54" rx="22" ry="7" fill="${s.belly}"/>
+${s.flank ? `<ellipse cx="58" cy="51" rx="7" ry="4" fill="${s.flank}"/>` : ''}
+<ellipse cx="32" cy="50" rx="10" ry="7" fill="${s.breast}"/>
+${s.throat ? `<ellipse cx="25" cy="47" rx="6" ry="4" fill="${s.throat}"/>` : ''}
+${s.face ? `<ellipse cx="28" cy="41" rx="7" ry="4.5" fill="${s.face}"/>` : ''}
+${s.cheek ? `<ellipse cx="30" cy="45" rx="6" ry="2.4" fill="${s.cheek}"/>` : ''}
+${s.mask ? `<path d="M17,39 Q27,36 37,40 Q27,44 17,43 Z" fill="${s.mask}"/>` : ''}
+<rect x="0" y="0" width="140" height="70" fill="url(#${p}sd)"/>
+</g>
+<path d="M21,39.5 L${21 - bl},42.6 L21,42.8 Z" fill="${s.beakColor}"/><path d="M21,42.8 L${21 - bl},42.6 L21,45 Z" fill="${s.beakLower ?? s.beakColor}"/>
+${s.eyeRing ? `<circle cx="26" cy="39.5" r="3" fill="${s.eyeRing}"/>` : ''}
+<circle cx="26" cy="39.5" r="2" fill="#111"/><circle cx="25.4" cy="38.9" r=".7" fill="#fff"/>
+<g class="wing near"><path d="${wing}" fill="url(#${p}w)"/>
+${s.wingbar ? `<path d="M50,30 Q60,26 70,24" stroke="${s.wingbar}" stroke-width="2" fill="none" stroke-linecap="round"/>` : ''}
+<path d="M64,8 L58,30 M70,10 L62,32 M75,12 L66,34" stroke="rgba(0,0,0,.3)" stroke-width=".7" fill="none"/></g>
+</svg></span>`;
+}
