@@ -5,6 +5,8 @@
    ・どの鳥も同じ「枝にとまった小鳥」の形を使い、色・くちばし・尾の長さ・
      冠羽などを変えて描き分ける
    ・グラデーションで丸みと陰を、細い線で羽を描いて、本物らしく見せる
+   ・絵は「尾（奥）／枝（真ん中）／体（手前）」の3枚に分けて重ね、
+     CSS で奥行きをつけて回すと、立体的に向きを変えて動いて見える（board.css）
    ============================================================ */
 import type { GemColor } from '../game/types.ts';
 
@@ -116,8 +118,14 @@ const SCALLOPS = [0, 1, 2].flatMap(r => [0, 1, 2, 3].map(c => {
   return `M${x.toFixed(1)},${y.toFixed(1)} q2.3,2.6 4.6,0`;
 })).join(' ');
 
-/** 鳥の絵（SVG の文字列） */
-export function birdSVG(color: GemColor, level: number): string {
+// 鳥が動く1周の秒数（board.css の birdTurn・birdHop と同じ）
+const MOTION_SEC = 9;
+
+/**
+ * 鳥の絵（3枚の SVG を重ねた HTML の文字列）
+ * @param seed カードごとに動きのタイミングをずらすための数
+ */
+export function birdSVG(color: GemColor, level: number, seed = 0): string {
   const s = SPECIES[color][Math.min(3, Math.max(1, level)) - 1]!;
   const p = `b${(serial++).toString(36)}`;
   // 尾：腰 (80,60) から右下へ伸ばす（枝の向こうへ垂れる）
@@ -139,28 +147,41 @@ export function birdSVG(color: GemColor, level: number): string {
     ? `<path d="M79,62 Q96,84 ${(tx + 6).toFixed(1)},${(ty - 6).toFixed(1)}" stroke="${s.tail}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
 <path d="M79,62 Q94,88 ${(tx - 2).toFixed(1)},${(ty + 6).toFixed(1)}" stroke="${s.tail}" stroke-width="2.2" fill="none" stroke-linecap="round"/>` : '';
 
-  return `<svg viewBox="14 1 106 94" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-<defs>
-<linearGradient id="${p}bk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.sheen ?? '#fff'}" stop-opacity="${s.sheen ? 0.5 : 0.12}"/><stop offset=".5" stop-color="${s.back}" stop-opacity="0"/></linearGradient>
-<radialGradient id="${p}hl" cx=".3" cy=".22" r=".55"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
-<linearGradient id="${p}sd" x1="0" y1="0" x2=".3" y2="1"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></linearGradient>
-<linearGradient id="${p}wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.wing}"/><stop offset=".55" stop-color="${s.wing}"/><stop offset="1" stop-color="${s.primaries}"/></linearGradient>
-<linearGradient id="${p}tl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.tail}"/><stop offset="1" stop-color="${s.primaries}"/></linearGradient>
-<linearGradient id="${p}br" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a07a52"/><stop offset=".5" stop-color="#6e4f32"/><stop offset="1" stop-color="#432e1b"/></linearGradient>
-<radialGradient id="${p}ey" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#3a3a3a"/><stop offset="1" stop-color="#050505"/></radialGradient>
-<filter id="${p}sf" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.3"/></filter>
-<filter id="${p}sf2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".45"/></filter>
-<clipPath id="${p}c"><path d="${body}"/></clipPath>
-</defs>
+  // 画面を描き直しても動きが途中から続くように、今の時刻から動きの位置を決める
+  const delay = -((Date.now() / 1000 + jitter(seed + 7) * MOTION_SEC) % MOTION_SEC);
+  const vb = 'viewBox="14 1 106 94" preserveAspectRatio="xMidYMid meet"';
+
+  // 奥：影と尾（枝の向こうへ垂れる）
+  const back = `<svg class="bl-back" ${vb}>
+<defs><linearGradient id="${p}tl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.tail}"/><stop offset="1" stop-color="${s.primaries}"/></linearGradient></defs>
 <ellipse cx="56" cy="88" rx="22" ry="2.2" fill="#000" opacity=".12"/>
 ${streamers}
 <path d="${tail}" fill="url(#${p}tl)"/>${tailLines}
+</svg>`;
+
+  // 真ん中：枝と葉
+  const mid = `<svg class="bl-mid" ${vb}>
+<defs><linearGradient id="${p}br" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a07a52"/><stop offset=".5" stop-color="#6e4f32"/><stop offset="1" stop-color="#432e1b"/></linearGradient></defs>
 <path d="M-2,91 C30,86 70,87.5 142,80" stroke="url(#${p}br)" stroke-width="6.5" fill="none" stroke-linecap="round"/>
 <path d="M8,89.5 l9,-1 M34,87.6 l11,-.4 M70,86.8 l8,-.6 M100,85 l9,-1 M124,82.6 l8,-1" stroke="#2f1f10" stroke-width=".7" opacity=".55"/>
 <path d="M14,90.6 l6,-.6 M86,87 l6,-.5" stroke="#d9b98f" stroke-width=".6" opacity=".5"/>
 <path d="M92,85.5 q7,-8 15,-10" stroke="#5a4028" stroke-width="2" fill="none" stroke-linecap="round"/>
 <path d="M106,75.5 q7,-7 12,1 q-7,5 -12,-1 Z" fill="#7da34a"/><path d="M106,75.5 q6,-1 12,1" stroke="#4f7230" stroke-width=".5" fill="none"/>
 <path d="M99,80 q2,-10 10,-12 q-1,9 -10,12 Z" fill="#94b85a"/><path d="M99,80 q4,-7 10,-12" stroke="#5f8236" stroke-width=".45" fill="none"/>
+</svg>`;
+
+  // 手前：体・つばさ・頭
+  const front = `<svg class="bl-front" ${vb}>
+<defs>
+<linearGradient id="${p}bk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.sheen ?? '#fff'}" stop-opacity="${s.sheen ? 0.5 : 0.12}"/><stop offset=".5" stop-color="${s.back}" stop-opacity="0"/></linearGradient>
+<radialGradient id="${p}hl" cx=".3" cy=".22" r=".55"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="${p}sd" x1="0" y1="0" x2=".3" y2="1"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></linearGradient>
+<linearGradient id="${p}wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.wing}"/><stop offset=".55" stop-color="${s.wing}"/><stop offset="1" stop-color="${s.primaries}"/></linearGradient>
+<radialGradient id="${p}ey" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#3a3a3a"/><stop offset="1" stop-color="#050505"/></radialGradient>
+<filter id="${p}sf" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.3"/></filter>
+<filter id="${p}sf2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".45"/></filter>
+<clipPath id="${p}c"><path d="${body}"/></clipPath>
+</defs>
 <path d="${body}" fill="${s.back}" stroke="rgba(0,0,0,.35)" stroke-width=".6"/>
 <g clip-path="url(#${p}c)">
 <rect x="0" y="0" width="140" height="100" fill="url(#${p}bk)"/>
@@ -196,4 +217,6 @@ ${s.wingbar ? `<path d="M51,46 Q60,50 67,58" stroke="${s.wingbar}" stroke-width=
 ${s.eyeRing ? `<circle cx="37.5" cy="21.5" r="3.9" fill="${s.eyeRing}"/>` : ''}
 <circle cx="37.5" cy="21.5" r="2.6" fill="url(#${p}ey)"/><circle cx="36.6" cy="20.6" r=".85" fill="#fff" opacity=".95"/>
 </svg>`;
+
+  return `<span class="bird3d" style="--bd:${delay.toFixed(2)}s" aria-hidden="true">${back}${mid}${front}</span>`;
 }

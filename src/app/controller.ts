@@ -13,6 +13,7 @@ import type { CardSource, GemColor, Level, Result, TokenColor } from '../game/ty
 import { sameSource } from '../game/utils.ts';
 import { $ } from '../view/dom.ts';
 import { playFx } from '../view/fx.ts';
+import { renderCoach } from '../view/coach.ts';
 import { render, renderDataCheck } from '../view/render.ts';
 import { hideResult, showResult, showResultOnce } from '../view/result.ts';
 import { hideCardTip, initCardTip, showCardTip, toggleCardTip } from '../view/tooltip.ts';
@@ -21,20 +22,28 @@ import { scheduleCpu, stopCpu } from './cpuRunner.ts';
 import { checkStorage, clearSave, loadSave, saveGame } from './save.ts';
 import { isCpuTurn, resetSelection, settings, showMessage, store, ui } from './state.ts';
 import { beginAction, endAction, resetTracking } from './tracker.ts';
+import {
+  nextStep, prevStep, scheduleTutorial, startTutorial, stopTutorial, syncTutorial, tutorial, tutorialBlock,
+} from './tutorial.ts';
 
 /** 画面を更新する（描き直し・保存・演出・CPUの予約） */
 export function refresh(): void {
   if (!store.game) return;
   const game = store.game;
+  syncTutorial(game);               // チュートリアル中は、手番に合わせて案内を進める
   render();
-  saveGame(game, settings);         // 1手ごと（画面が変わるたび）に自動保存
+  renderCoach();
+  // 1手ごと（画面が変わるたび）に自動保存。チュートリアルは練習なので保存しない
+  if (!tutorial.active) saveGame(game, settings);
   const fx = ui.fx;
   ui.fx = null;                     // 演出は1回だけ
   const fxMs = playFx(fx, game);
   // 勝負がついたら、行動の演出が終わってから勝敗の画面を出す
   showResultOnce(game, fxMs + 300);
   // CPUは、演出が終わるのを待ってから考え始める（演出が重ならないように）
-  scheduleCpu(refresh, () => !$('#startScreen').hidden, fxMs);
+  const paused = () => !$('#startScreen').hidden;
+  if (tutorial.active) scheduleTutorial(refresh, paused, fxMs);
+  else scheduleCpu(refresh, paused, fxMs);
 }
 
 // ルールの行動を実行し、結果に合わせて画面を更新（演出もここで準備）
@@ -100,6 +109,7 @@ function onTapCard(src: CardSource): void {
 // CPUの番でも使える操作（メニューや画面の切り替え）
 const ALWAYS_ALLOWED = [
   'newgame', 'start', 'resume', 'rules', 'closeRules', 'menu', 'closeMenu', 'toStart', 'backdrop', 'log', 'closeLog', 'closeResult', 'cardsTip',
+  'tutorial', 'tutNext', 'tutBack', 'tutQuit',
 ];
 
 const toLevel = (v: string | undefined): Level => (v === '2' ? 2 : v === '3' ? 3 : 1);
@@ -115,6 +125,13 @@ function onClick(e: MouseEvent): void {
   // 重ねた画面の外側（暗い部分）をタップしたら閉じる
   if (d.act === 'backdrop') {
     if (e.target === el) el.hidden = true;
+    return;
+  }
+  // チュートリアル中は、案内された操作だけを受け付ける
+  const block = tutorialBlock(d.act ?? '', d);
+  if (block) {
+    showMessage(block);
+    refresh();
     return;
   }
   // CPUの番の間は、メニュー操作以外を受け付けない
@@ -150,6 +167,10 @@ function onClick(e: MouseEvent): void {
     case 'pass':       if (game) run(() => actPass(game)); break;
     case 'clear':      resetSelection(); ui.message = ''; refresh(); break;
     case 'newgame':    showStartScreen(); break;
+    case 'tutorial':   beginTutorial(); break;
+    case 'tutNext':    nextStep(); refresh(); break;
+    case 'tutBack':    prevStep(); refresh(); break;
+    case 'tutQuit':    showStartScreen(); break;
   }
 }
 
@@ -160,6 +181,7 @@ function startGame(level: string): void {
   // 保存された続きがある場合は、消してよいか確認する
   if (loadSave() && !confirm('保存されている続きは消えます。新しく始めますか？')) return;
   stopCpu();
+  stopTutorial();
   clearSave();
   if (level === 'pvp' || !isCpuLevel(level)) {
     settings.mode = 'pvp';
@@ -167,7 +189,7 @@ function startGame(level: string): void {
   } else {
     settings.mode = 'cpu';
     settings.level = level;
-    store.game = createGame(['あなた', `CPU（${CPU_LEVELS[level]}）`]);
+    store.game = createGame(['あなた', CPU_LEVELS[level]]);
   }
   resetSelection();
   resetTracking();
@@ -181,8 +203,12 @@ function resumeGame(): void {
   const save = loadSave();
   if (!save) { renderStartScreen(null); return; }
   stopCpu();
+  stopTutorial();
   Object.assign(settings, save.settings);
   store.game = save.game;
+  // 前の版の名前（「CPU（ふつう）」など）を、今の名前（「CPU Lv2」など）に直す
+  const cpu = settings.mode === 'cpu' ? store.game.players[settings.cpuIndex] : undefined;
+  if (cpu?.name.startsWith('CPU（')) cpu.name = CPU_LEVELS[settings.level];
   resetSelection();
   resetTracking();
   showMessage('前回の続きから再開しました', 'info');
@@ -190,8 +216,25 @@ function resumeGame(): void {
   refresh();
 }
 
+// チュートリアルを始める（保存されている続きはそのまま残す）
+function beginTutorial(): void {
+  stopCpu();
+  hideResult();
+  startTutorial();
+  // 相手は CPU として表示する（伏せ札を隠す・相手の番は操作できない）
+  settings.mode = 'cpu';
+  settings.level = 'easy';
+  resetSelection();
+  resetTracking();
+  ui.message = '';
+  $('#startScreen').hidden = true;
+  refresh();
+}
+
 function showStartScreen(): void {
   stopCpu();
+  stopTutorial();
+  renderCoach(); // 案内を消す
   hideResult();
   renderStartScreen(loadSave());
   $('#startScreen').hidden = false;

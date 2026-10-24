@@ -33,9 +33,10 @@ export function cardHTML(card: CardLike, opts: CardOptions = {}): string {
   const { attrs = '', cls = '', tag = 'button', badge = '' } = opts;
   const costs = COLORS.filter(c => card.cost[c] > 0)
     .map(c => tokenHTML(c, card.cost[c], 'mini', `title="${JP[c]}${card.cost[c]}"`)).join('');
-  // 真ん中に、ボーナスの色とレベルで決まる鳥の絵（15種類）
+  // 真ん中に、ボーナスの色とレベルで決まる鳥の絵（15種類）。カードごとに動きのタイミングをずらす
+  const seed = COLORS.reduce((sum, c, i) => sum + card.cost[c] * (i + 3), card.level * 11 + card.points);
   return `<${tag} class="card c-${card.color} ${cls}" ${attrs} aria-label="${cardLabel(card)}・${birdName(card.color, card.level)}">
-    <span class="card-bird">${birdSVG(card.color, card.level)}</span>
+    <span class="card-bird">${birdSVG(card.color, card.level, seed)}</span>
     <span class="card-name">${birdName(card.color, card.level)}</span>
     <div class="card-head"><span class="card-pts">${card.points || ''}</span>${gemShape(card.color)}</div>
     <div class="card-cost">${costs}</div>${badge}

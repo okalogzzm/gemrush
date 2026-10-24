@@ -10,7 +10,8 @@ export type { CpuLevel } from './pending.ts';
 export { resolvePending } from './pending.ts';
 export { applyMove, listLegalMoves } from './moves.ts';
 
-export const CPU_LEVELS: Readonly<Record<CpuLevel, string>> = { easy: 'かんたん', normal: 'ふつう', hard: 'つよい' };
+// 画面に出すCPUの名前（強さの順に Lv1〜3）
+export const CPU_LEVELS: Readonly<Record<CpuLevel, string>> = { easy: 'CPU Lv1', normal: 'CPU Lv2', hard: 'CPU Lv3' };
 
 /** 強さに応じて手を1つ選ぶ（合法手がなければ null） */
 export function chooseCpuMove(state: GameState, pi: number, level: CpuLevel, hardOpts?: HardOptions): Move | null {

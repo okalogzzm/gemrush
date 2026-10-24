@@ -1,0 +1,73 @@
+/* ===== チュートリアルの案内（src/view/coach.ts） =====
+   ・操作する場所を隠さないように、画面の上か下に浮かべる（最初と最後だけ真ん中）
+   ・メニューなどの重ねた画面（z-index 50）より下、ゲーム画面より上 */
+#coach[hidden] { display: none; }
+.coach {
+  position: fixed; left: 0; right: 0; z-index: 35; display: flex; justify-content: center;
+  padding: 0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
+  pointer-events: none;
+}
+.coach.top { top: max(6px, env(safe-area-inset-top)); }
+.coach.bottom { bottom: max(6px, env(safe-area-inset-bottom)); }
+.coach.center {
+  inset: 0; align-items: center; padding: 16px;
+  background: rgba(60, 110, 140, 0.35); pointer-events: auto;
+}
+.coach-box {
+  pointer-events: auto; display: flex; gap: 8px; align-items: flex-start;
+  width: 100%; max-width: 440px; padding: 8px 10px 8px 6px; border-radius: 14px;
+  background: linear-gradient(180deg, #fffdf4, #fbefcb); color: var(--text);
+  border: 2px solid #e0a020; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.7), 0 8px 24px rgba(30, 70, 100, 0.35);
+  animation: coachIn 0.35s ease-out;
+}
+.coach.center .coach-box { max-width: 360px; padding: 14px 14px 12px 8px; }
+.coach-bird { display: flex; flex: none; width: 54px; height: 48px; perspective: 200px; margin-top: 2px; }
+.coach.center .coach-bird { width: 72px; height: 64px; }
+.coach-main { flex: 1; min-width: 0; }
+.coach-step { font-size: 0.7rem; font-weight: 800; color: var(--accent-ink); letter-spacing: 0.05em; }
+.coach-text { margin: 2px 0 4px; font-size: 0.88rem; line-height: 1.45; text-align: left; }
+.coach-text b { color: var(--accent-ink); }
+.coach-btns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.coach-btns .btn { min-height: 44px; padding: 4px 14px; }
+.coach.center .coach-btns { justify-content: stretch; }
+.coach.center .coach-btns .btn { flex: 1 1 100%; }
+.coach-btns .coach-gap { flex: 1; }
+.coach.center .coach-gap { display: none; }
+.btn.ghost { background: transparent; border-color: transparent; box-shadow: none; color: var(--muted); font-weight: 700; padding-left: 6px; }
+
+/* 光らせた所のすぐ上か下に出す案内（top は coach.ts で決める）。矢印でその場所を指す */
+.coach.near { top: 0; }
+.coach-box { position: relative; }
+.coach-arrow {
+  position: absolute; width: 16px; height: 16px; margin-left: -8px;
+  background: #fffdf4; border: 2px solid #e0a020; transform: rotate(45deg);
+}
+.coach-arrow[hidden] { display: none; }
+.coach.below .coach-arrow { top: -9px; border-right: none; border-bottom: none; }
+.coach.above .coach-arrow { bottom: -9px; border-left: none; border-top: none; background: #fbefcb; }
+
+/* 操作してほしい場所：金色の枠で点滅させる */
+.tut-focus {
+  position: relative; z-index: 6;
+  outline: 3px solid #f0a000; outline-offset: 2px; border-radius: 10px;
+  animation: tutPulse 1.1s ease-in-out infinite;
+}
+@keyframes tutPulse {
+  50% { outline-color: rgba(240, 160, 0, 0.25); box-shadow: 0 0 18px 4px rgba(255, 200, 60, 0.75); }
+}
+@keyframes coachIn { from { opacity: 0; transform: translateY(6px); } }
+
+/* 背の低い縦長の画面：宝石の列を隠さないように、吹き出しを低くする */
+@media (orientation: portrait) and (max-height: 640px) {
+  .coach:not(.center) .coach-bird { display: none; }
+  .coach:not(.center) .coach-box { padding: 5px 10px; }
+  .coach:not(.center) .coach-text { font-size: 0.8rem; line-height: 1.35; margin: 0 0 2px; }
+}
+
+/* 横長の小さい画面：吹き出しを右の列にそろえて、盤面のカードを隠さない */
+@media (orientation: landscape) and (max-height: 500px) {
+  .coach.top, .coach.bottom { justify-content: flex-end; }
+  .coach.top .coach-box, .coach.bottom .coach-box { max-width: 46%; }
+  .coach-text { font-size: 0.8rem; line-height: 1.35; }
+  .coach-bird { width: 40px; height: 36px; }
+}

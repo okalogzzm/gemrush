@@ -17,25 +17,77 @@
 }
 .modal-box h3 { margin: 16px 0 4px; color: var(--accent-ink); font-size: 1rem; }
 .modal-box p { color: var(--muted); margin: 4px 0 10px; text-align: center; }
-.logo { display: flex; justify-content: center; gap: 8px; }
-.logo .gem-shape { --gs: 34px; animation: float 3s ease-in-out infinite; }
-.logo .gem-shape:nth-child(2) { animation-delay: -1s; }
-.logo .gem-shape:nth-child(3) { animation-delay: -2s; }
 .level-btn {
-  display: flex; align-items: center; gap: 12px; width: 100%; margin: 8px 0; padding: 12px; min-height: 60px;
+  display: flex; align-items: center; gap: 10px; width: 100%; margin: 6px 0; padding: 6px 12px; min-height: 48px;
   border-radius: 12px; text-align: left; color: var(--text);
   background: rgba(255, 255, 255, 0.6); border: 1.5px solid var(--panel-border); box-shadow: 0 1px 0 #cdbb90;
 }
 .level-btn:active { transform: scale(0.98); }
-.level-btn b { font-size: 1.12rem; }
-.level-btn small { display: block; color: var(--muted); margin-top: 2px; }
-.level-btn .gem-shape { --gs: 30px; }
+.level-btn > span { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex: 1; min-width: 0; }
+.level-btn b { font-size: 1.05rem; white-space: nowrap; }
+.level-btn small { color: var(--muted); font-size: 0.8rem; text-align: right; }
+.level-btn .gem-shape { --gs: 24px; flex: none; }
 .resume-box {
-  border: 1.5px solid var(--accent); border-radius: 12px; padding: 10px; margin: 12px 0 4px;
+  border: 1.5px solid var(--accent); border-radius: 12px; padding: 8px; margin: 10px 0 4px;
   background: rgba(224, 160, 32, 0.1); text-align: center;
 }
-.resume-box small { display: block; color: var(--muted); margin: 4px 0 8px; }
+.resume-box small { display: block; color: var(--muted); margin: 0 0 6px; font-size: 0.8rem; line-height: 1.4; }
+.resume-box .btn { width: 100%; }
 .warn { color: var(--ng) !important; font-size: 0.85rem; }
+
+/* ===== 開始画面：細めのカードを画面の真ん中に（縦の真ん中は .modal-box の margin: auto） ===== */
+.start-box { max-width: 330px; padding: 14px 16px 12px; text-align: center; }
+/* タイトル：枝にとまる小鳥と、金の文字 */
+.title { position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
+.title-bird { display: flex; width: 108px; height: 92px; perspective: 260px; margin-bottom: -10px; }
+.start-box .title-main {
+  margin: 0; font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 700;
+  font-size: 2.5rem; line-height: 1.05; letter-spacing: 0.04em;
+  background: linear-gradient(180deg, #f6cf62 10%, #c98a1c 55%, #8a5208);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 #fff) drop-shadow(0 2px 3px rgba(138, 82, 8, 0.25));
+}
+.title-sub {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 2px; padding: 2px 18px;
+  font-size: 0.95rem; font-weight: 800; letter-spacing: 0.3em; text-indent: 0.3em; color: #fff;
+  background: linear-gradient(180deg, #5aa8e8, #2f7fd0); border-radius: 4px;
+  clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+.title-sub span { letter-spacing: 0; text-indent: 0; opacity: 0.85; }
+.tut-btn {
+  position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; margin: 12px 0 4px;
+  padding: 10px 12px 8px; min-height: 56px; border-radius: 12px; color: #4a2c00;
+  background: linear-gradient(180deg, #fff1b8, #f6c94e); border: 1.5px solid #d39a1c;
+  box-shadow: 0 2px 0 #b98012, 0 4px 12px rgba(224, 160, 32, 0.35);
+}
+.tut-btn:active { transform: scale(0.98); }
+.tut-btn b { font-size: 1.1rem; }
+.tut-btn small { font-size: 0.78rem; opacity: 0.8; }
+.tut-new {
+  position: absolute; top: -9px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+  padding: 0 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 800; color: #fff; background: var(--ng);
+}
+.start-label { margin: 12px 0 0; font-size: 0.8rem; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; }
+.link-btn { width: 100%; margin-top: 6px; min-height: 44px; }
+/* 背の低い画面：スクロールしなくても全部見えるように詰める */
+@media (max-height: 640px) {
+  #startScreen { padding-top: 4px; padding-bottom: 4px; }
+  .start-box { padding: 10px 14px; }
+  .title-bird { width: 80px; height: 68px; margin-bottom: -8px; }
+  .start-box .title-main { font-size: 2.1rem; }
+  .tut-btn { margin-top: 10px; padding: 8px 12px 6px; min-height: 50px; }
+  .start-label { margin-top: 8px; }
+  .level-btn { margin: 4px 0; min-height: 44px; }
+  .link-btn { margin-top: 4px; }
+  /* 「続きから」があるときは、さらに詰める */
+  .start-box:has(.resume-box) .title-bird { width: 64px; height: 54px; margin-bottom: -6px; }
+  .resume-box { padding: 6px 8px; margin: 8px 0 0; }
+  .resume-box small { margin-bottom: 4px; font-size: 0.75rem; }
+  .resume-box .when, .tut-btn small { display: none; }
+  .tut-btn { min-height: 44px; }
+  .start-box:has(.resume-box) .level-btn { margin: 3px 0; }
+}
 .menu-list .btn { width: 100%; margin: 6px 0; }
 .save-status { font-size: 0.85rem; color: var(--muted); text-align: center; margin-top: 8px; }
 

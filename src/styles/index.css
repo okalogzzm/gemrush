@@ -8,4 +8,5 @@
 @import './screens.css';
 @import './recent.css';
 @import './result.css';
+@import './coach.css';
 @import './fx.css'; /* 「動きを減らす」設定の指定があるので最後に読む */

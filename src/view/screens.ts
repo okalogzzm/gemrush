@@ -5,7 +5,8 @@ import { saveStatus, type SaveData } from '../app/save.ts';
 import { CPU_LEVELS } from '../cpu/index.ts';
 import { COLORS, JP } from '../game/constants.ts';
 import { getPoints } from '../game/rules.ts';
-import type { Card, Noble } from '../game/types.ts';
+import type { Card, GemColor, Noble } from '../game/types.ts';
+import { birdSVG } from './birds.ts';
 import { cardHTML, gemShape, nobleHTML, tokenHTML } from './components.ts';
 import { $ } from './dom.ts';
 
@@ -14,32 +15,35 @@ export function renderStartScreen(save: SaveData | null): void {
   let resume = '';
   if (save) {
     const g = save.game;
-    const mode = save.settings.mode === 'pvp' ? '2人対戦' : `CPU（${CPU_LEVELS[save.settings.level] ?? ''}）`;
-    const pts = g.players.map(p => `${p.name} ${getPoints(p)}点`).join(' ／ ');
+    const mode = save.settings.mode === 'pvp' ? '2人対戦' : CPU_LEVELS[save.settings.level] ?? 'CPU';
+    const pts = g.players.map(p => `${p.name.startsWith('CPU') ? 'CPU' : p.name} ${getPoints(p)}点`).join(' ／ ');
     let when = '';
     try {
       when = new Date(save.savedAt).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     } catch { /* 日付が読めなくても続ける */ }
     resume = `<div class="resume-box">
-      <b>前回の続きがあります</b>
-      <small>${mode}・ラウンド${g.round}<br>${pts}${when ? `<br>保存：${when}` : ''}</small>
-      <button class="btn primary big" data-act="resume">続きから</button>
-    </div>
-    <h3>新しく始める</h3>`;
-  } else {
-    resume = '<p>CPUの強さを選んでください（先手はランダム）</p>';
+      <small>${mode}・ラウンド${g.round}・${pts}${when ? `<span class="when"><br>保存：${when}</span>` : ''}</small>
+      <button class="btn primary" data-act="resume">▶ 続きから</button>
+    </div>`;
   }
   const warn = saveStatus.ok === false
     ? '<p class="warn">このブラウザでは途中保存が使えません（遊ぶことはできます）</p>' : '';
-  $('#startScreen').innerHTML = `<div class="modal-box">
-    <div class="logo">${gemShape('red')}${gemShape('blue')}${gemShape('green')}</div>
-    <h1>ジェムラッシュ</h1>
+  const level = (lv: string, color: GemColor, name: string, note: string) =>
+    `<button class="level-btn" data-act="start" data-level="${lv}">${gemShape(color)}<span><b>${name}</b><small>${note}</small></span></button>`;
+  $('#startScreen').innerHTML = `<div class="modal-box start-box">
+    <div class="title">
+      <span class="title-bird">${birdSVG('blue', 2, 1)}</span>
+      <h1 class="title-main">Splender</h1>
+      <div class="title-sub"><span>～</span>小鳥<span>～</span></div>
+    </div>
     ${resume}
-    <button class="level-btn" data-act="start" data-level="easy">${gemShape('green')}<span><b>かんたん</b><small>ほぼでたらめに動く。買えるカードはよく買う</small></span></button>
-    <button class="level-btn" data-act="start" data-level="normal">${gemShape('blue')}<span><b>ふつう</b><small>目標のカードを決めて宝石を集める</small></span></button>
-    <button class="level-btn" data-act="start" data-level="hard">${gemShape('red')}<span><b>つよい</b><small>数手先まで読み、邪魔もしてくる</small></span></button>
-    <button class="level-btn" data-act="start" data-level="pvp">${gemShape('white')}<span><b>2人で対戦</b><small>CPUなし。同じ画面で交互に操作</small></span></button>
-    <button class="btn big" data-act="rules" style="margin-top:8px">ルール説明</button>
+    <div class="start-label">対戦相手をえらぶ</div>
+    ${level('easy', 'green', CPU_LEVELS.easy, 'やさしい')}
+    ${level('normal', 'blue', CPU_LEVELS.normal, 'ふつう')}
+    ${level('hard', 'red', CPU_LEVELS.hard, '先を読む・手ごわい')}
+    ${level('pvp', 'white', '2人で対戦', '同じ画面で交互に')}
+    <button class="tut-btn" data-act="tutorial"><span class="tut-new">はじめての方へ</span><b>チュートリアル</b><small>実際に動かしながら遊び方をおぼえる</small></button>
+    <button class="btn link-btn" data-act="rules">📖 ルール説明</button>
     ${warn}
   </div>`;
 }

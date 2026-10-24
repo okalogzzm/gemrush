@@ -4,8 +4,8 @@ Claude がこのリポジトリで作業するときのガイドです。くわ�
 
 ## プロジェクト概要
 
-- **ジェムラッシュ**：「宝石の煌き（Splendor）」の公式2人用ルールを元にした、オリジナルデザインのブラウザゲーム
-- CPU対戦（かんたん／ふつう／つよい）と2人対戦（同じ画面で交互に操作）
+- **Splender ～小鳥～**（旧名：ジェムラッシュ）：「宝石の煌き（Splendor）」の公式2人用ルールを元にした、オリジナルデザインのブラウザゲーム
+- CPU対戦（画面の表示は CPU Lv1／Lv2／Lv3、中では easy／normal／hard）と2人対戦（同じ画面で交互に操作）、チュートリアル
 - スマホのホーム画面に追加して、オフラインでも遊べる Web アプリ（PWA）
 - 公開先：https://okalogzzm.github.io/gemrush/ （GitHub Pages）
 - 技術：TypeScript ＋ esbuild（ビルド）＋ Node 標準のテスト機能。**実行時の外部ライブラリと画像以外の素材は使わない**（見た目はすべて CSS）
@@ -32,8 +32,8 @@ npm run bench -- hard normal 30   # CPUどうしの自動対戦で強さを確�
 src/
   game/        ルール（画面を触らない）。types / constants / data（カード） / rules / diff / validate / utils
   cpu/         CPU。moves（合法手） / heuristics（評価） / strategies（強さ別） / pending（返却・貴族選択）
-  app/         アプリの状態と流れ。state / controller（タップ受付・refresh） / cpuRunner / tracker（直前の変化） / save
-  view/        HTML を作る部分。components / render / screens（開始・メニュー・ルール） / fx（演出） / result（勝敗の画面）
+  app/         アプリの状態と流れ。state / controller（タップ受付・refresh） / cpuRunner / tracker（直前の変化） / save / tutorial（チュートリアルの流れ）
+  view/        HTML を作る部分。components / birds（3Dで動く小鳥） / render / screens（開始・メニュー・ルール） / coach（チュートリアルの吹き出し） / fx（演出） / result（勝敗の画面）
   styles/      CSS（index.css から読み込む）
   main.ts      入口 / pwa.ts  Service Worker の登録
 public/        そのまま公開する物（manifest.webmanifest、icons/）

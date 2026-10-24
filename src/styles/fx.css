@@ -125,5 +125,6 @@
 /* 動きを減らす設定の人には、アニメーションを止める */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  .tut-focus { outline-color: #f0a000 !important; }
   #message.show { opacity: 1; }
 }
