@@ -24,7 +24,7 @@
 .took-tag {
   position: absolute; top: 0; left: 4%; z-index: 2;
   min-width: 1.6em; padding: 0 4px; border-radius: 10px;
-  font-weight: 900; font-size: 0.85rem; color: #1a1205;
+  font-weight: 900; font-size: 0.85rem; color: #fff;
   background: var(--pc, var(--p1)); box-shadow: 0 0 8px var(--pc, var(--p1));
 }
 .took-tag.p0 { --pc: var(--p0); }
@@ -35,7 +35,7 @@
 .got-tag {
   position: absolute; top: -6px; right: -8px; z-index: 2;
   padding: 0 4px; border-radius: 8px;
-  font-size: 0.72rem; font-weight: 900; line-height: 1.35; color: #1a1205;
+  font-size: 0.72rem; font-weight: 900; line-height: 1.35; color: #fff;
   background: var(--pc); box-shadow: 0 0 6px var(--pc);
 }
 .player.p0 { --pc: var(--p0); }
@@ -49,14 +49,14 @@
 #recentBar.recent {
   display: flex; align-items: center; gap: 6px 8px;
   margin-bottom: 4px; padding: 2px 8px; border-radius: 8px; flex-wrap: nowrap;
-  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--panel-border); border-left: 4px solid var(--pc);
+  background: rgba(255, 255, 255, 0.6); border: 1px solid var(--panel-border); border-left: 4px solid var(--pc);
   font-size: 0.82rem;
 }
 .recent.p0 { --pc: var(--p0); }
 .recent.p1 { --pc: var(--p1); }
 .recent-tag {
   flex: none; padding: 1px 7px; border-radius: 6px;
-  font-size: 0.75rem; font-weight: 900; color: #10121f; background: var(--pc);
+  font-size: 0.75rem; font-weight: 900; color: #fff; background: var(--pc);
 }
 .recent-items { display: inline-flex; align-items: center; gap: 5px; flex: none; }
 .recent-toks { display: inline-flex; gap: 3px; }
@@ -67,10 +67,10 @@
 .recent .noble.recent-noble .crown { width: 16px; height: 10px; }
 .recent .noble.recent-noble .np { font-size: 0.85rem; }
 .recent .noble.recent-noble .req-chip { width: 1.4em; height: 1.6em; font-size: 0.7rem; }
-.recent-text { flex: 1 1 auto; min-width: 0; color: #d8dbf5; line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-text { flex: 1 1 auto; min-width: 0; color: var(--text); line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ===== 対戦ログ：直前の手番の行 ===== */
-#log li.recent-log { color: #fff; font-weight: 700; }
+#log li.recent-log { color: var(--text); font-weight: 800; }
 #log li.recent-log.p0::marker { color: var(--p0); }
 #log li.recent-log.p1::marker { color: var(--p1); }
 

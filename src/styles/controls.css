@@ -2,8 +2,8 @@
 #controls {
   position: relative; z-index: 15;
   min-height: 112px;
-  background: rgba(10, 12, 32, 0.94);
-  border: 1px solid rgba(255, 211, 110, 0.4); border-radius: 12px; box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.45);
+  background: var(--panel);
+  border: 1px solid var(--panel-border); border-radius: 12px; box-shadow: var(--shadow);
   padding: 6px 8px;
   font-size: 0.9rem;
 }
@@ -12,7 +12,7 @@
   position: fixed; left: 0; right: 0; margin: 0 auto; width: min(calc(100vw - 24px), 440px);
   bottom: max(150px, 24dvh); z-index: 30;
   padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; text-align: center;
-  background: rgba(20, 22, 48, 0.97); border: 1.5px solid currentColor; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  background: #fffaf0; border: 2px solid currentColor; box-shadow: 0 6px 18px rgba(40, 70, 90, 0.35);
   pointer-events: none; opacity: 0; visibility: hidden;
 }
 #message.show { visibility: visible; animation: toast 3.2s ease-out forwards; }
@@ -22,14 +22,14 @@
 .ctrl-row { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-top: 5px; }
 .btn {
   min-height: 46px; padding: 6px 16px; border-radius: 12px; font-weight: 800;
-  background: rgba(255, 255, 255, 0.08); color: #fff; border: 1.5px solid rgba(255, 255, 255, 0.3);
+  background: #fffaf0; color: var(--text); border: 1.5px solid #b19e74; box-shadow: 0 1px 0 #cdbb90;
 }
 .btn.primary {
-  background: linear-gradient(180deg, #ffe48f, #e8a920); color: #2a1a00; border-color: #ffe48f;
-  box-shadow: 0 0 14px rgba(255, 200, 60, 0.4);
+  background: linear-gradient(180deg, #5aa8e8, #2f7fd0); color: #fff; border-color: #2a6fb8;
+  box-shadow: 0 2px 0 #1f5fa8, 0 3px 10px rgba(47, 127, 208, 0.35);
 }
 .btn:not(:disabled):active { transform: scale(0.96); }
-.btn:disabled { opacity: 0.35; box-shadow: none; }
+.btn:disabled { opacity: 0.4; box-shadow: none; }
 .btn.big { width: 100%; font-size: 1.1rem; }
 .ng { color: var(--ng); font-size: 0.85rem; }
 .hint { color: var(--muted); font-size: 0.85rem; }
@@ -46,7 +46,7 @@
 #logScreen .modal-box { max-width: 560px; padding-top: 0; }
 #log {
   background: var(--panel); border: 1px solid var(--panel-border); border-radius: 12px;
-  margin: 0 0 8px; padding: 8px 8px 8px 2.6em; font-size: 0.88rem; color: #d8dbf5;
+  margin: 0 0 8px; padding: 8px 8px 8px 2.6em; font-size: 0.88rem; color: var(--text);
 }
 #log li { margin: 3px 0; }
 #log li::marker { color: var(--muted); }

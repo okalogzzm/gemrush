@@ -1,20 +1,21 @@
 /* ===== 重ねて表示する画面（開始・メニュー・ルール） ===== */
 .overlay {
   position: fixed; inset: 0; z-index: 50; overflow-y: auto;
-  background: rgba(5, 6, 18, 0.86); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  background: rgba(60, 110, 140, 0.45); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
   display: flex; align-items: flex-start; justify-content: center; padding: 24px 14px;
 }
 .overlay[hidden] { display: none; }
 .modal-box {
   width: 100%; max-width: 440px; margin: auto; border-radius: 18px; padding: 20px 16px;
-  background: radial-gradient(circle at 50% 0, rgba(120, 90, 220, 0.35), transparent 60%), linear-gradient(170deg, #1d1f40, #0e0f22);
-  border: 1px solid rgba(255, 211, 110, 0.45); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  background: radial-gradient(ellipse 90% 60% at 50% 30%, #fdf8ea, #f1e5c6 75%, #e6d4aa); color: var(--text);
+  border: 1.5px solid #c9a24a; box-shadow: 0 0 0 4px rgba(255, 250, 235, 0.6), 0 12px 36px rgba(30, 70, 100, 0.35);
 }
 .modal-box h1 {
   margin: 6px 0 2px; font-size: 2rem; text-align: center; letter-spacing: 0.06em;
-  background: linear-gradient(180deg, #fff6cf, #f0b429); -webkit-background-clip: text; background-clip: text; color: transparent;
+  background: linear-gradient(180deg, #e2a62e, #8a5208); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 #fff);
 }
-.modal-box h3 { margin: 16px 0 4px; color: var(--accent); font-size: 1rem; }
+.modal-box h3 { margin: 16px 0 4px; color: var(--accent-ink); font-size: 1rem; }
 .modal-box p { color: var(--muted); margin: 4px 0 10px; text-align: center; }
 .logo { display: flex; justify-content: center; gap: 8px; }
 .logo .gem-shape { --gs: 34px; animation: float 3s ease-in-out infinite; }
@@ -22,8 +23,8 @@
 .logo .gem-shape:nth-child(3) { animation-delay: -2s; }
 .level-btn {
   display: flex; align-items: center; gap: 12px; width: 100%; margin: 8px 0; padding: 12px; min-height: 60px;
-  border-radius: 12px; text-align: left; color: #fff;
-  background: rgba(255, 255, 255, 0.06); border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px; text-align: left; color: var(--text);
+  background: rgba(255, 255, 255, 0.6); border: 1.5px solid var(--panel-border); box-shadow: 0 1px 0 #cdbb90;
 }
 .level-btn:active { transform: scale(0.98); }
 .level-btn b { font-size: 1.12rem; }
@@ -31,7 +32,7 @@
 .level-btn .gem-shape { --gs: 30px; }
 .resume-box {
   border: 1.5px solid var(--accent); border-radius: 12px; padding: 10px; margin: 12px 0 4px;
-  background: rgba(255, 211, 110, 0.08); text-align: center;
+  background: rgba(224, 160, 32, 0.1); text-align: center;
 }
 .resume-box small { display: block; color: var(--muted); margin: 4px 0 8px; }
 .warn { color: var(--ng) !important; font-size: 0.85rem; }
@@ -42,19 +43,19 @@
 #rulesScreen .modal-box { max-width: 680px; padding-top: 0; }
 .rules-head {
   position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 0 10px; background: linear-gradient(#1d1f40 70%, rgba(29, 31, 64, 0));
+  padding: 14px 0 10px; background: linear-gradient(#f9f1dc 70%, rgba(249, 241, 220, 0));
 }
-.rules-head h2 { margin: 0; font-size: 1.3rem; color: var(--accent); letter-spacing: 0; }
+.rules-head h2 { margin: 0; font-size: 1.3rem; color: var(--accent-ink); letter-spacing: 0; }
 .rule-sec { margin: 6px 0 18px; line-height: 1.65; }
-.rule-sec h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 1.05rem; color: #fff; }
-.rule-sec p, .rule-sec li { color: #d8dbf5; text-align: left; }
+.rule-sec h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 1.05rem; color: var(--text); }
+.rule-sec p, .rule-sec li { color: #4a3d28; text-align: left; }
 .rule-sec ul { margin: 4px 0; padding-left: 1.3em; }
 .num {
   display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%;
   font-weight: 900; color: #2a1a00; background: linear-gradient(180deg, #ffe48f, #e8a920); flex: none;
 }
 .rule-box {
-  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--panel-border); border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55); border: 1px solid var(--panel-border); border-radius: 12px;
   padding: 10px 12px; margin: 8px 0;
 }
 .rule-box.a1 { border-left: 4px solid #4aa3ff; }
@@ -72,4 +73,4 @@
 .anatomy { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; }
 .anatomy .card { width: 100px; font-size: 14px; }
 .anatomy ol { margin: 0; padding-left: 1.3em; }
-.hl { color: var(--accent); font-weight: 800; }
+.hl { color: var(--accent-ink); font-weight: 800; }

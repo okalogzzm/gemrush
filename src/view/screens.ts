@@ -87,6 +87,7 @@ function buildRulesHTML(): string {
         <li>左上の数字＝<span class="hl">得点</span>（0点のカードは空白）</li>
         <li>右上の宝石＝買うともらえる<span class="hl">ボーナスの色</span></li>
         <li>下の丸＝買うのに必要な<span class="hl">宝石（コスト）</span></li>
+        <li>真ん中の鳥＝ボーナスの色とレベルで決まる<span class="hl">15種類の鳥</span>（同じ色は同じ色の鳥）</li>
       </ol>
     </div>
     <p>宝石は色ごとに形も違います：

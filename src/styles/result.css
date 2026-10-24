@@ -2,9 +2,9 @@
    勝敗の画面（勝ったときは盛大に）
    ============================================================ */
 #resultScreen { z-index: 60; align-items: center; overflow-x: hidden; }
-.result.win { background: radial-gradient(circle at 50% 40%, rgba(90, 60, 10, 0.92), rgba(5, 6, 18, 0.96) 70%); }
-.result.draw { background: radial-gradient(circle at 50% 40%, rgba(40, 40, 90, 0.92), rgba(5, 6, 18, 0.96) 70%); }
-.result.lose { background: radial-gradient(circle at 50% 40%, rgba(20, 30, 60, 0.94), rgba(5, 6, 18, 0.97) 70%); }
+.result.win { background: radial-gradient(circle at 50% 40%, rgba(255, 248, 220, 0.97), rgba(143, 203, 232, 0.97) 75%); }
+.result.draw { background: radial-gradient(circle at 50% 40%, rgba(240, 242, 255, 0.97), rgba(170, 190, 230, 0.97) 75%); }
+.result.lose { background: radial-gradient(circle at 50% 40%, rgba(232, 238, 244, 0.97), rgba(150, 175, 200, 0.97) 75%); }
 
 /* 勝ったとき、最初に画面全体がぱっと金色に光る */
 .result.win::before {
@@ -16,7 +16,7 @@
 /* 回る光の筋 */
 .res-rays {
   position: fixed; left: 50%; top: 38%; width: 240vmax; height: 240vmax; margin: -120vmax 0 0 -120vmax; pointer-events: none;
-  background: repeating-conic-gradient(from 0deg, rgba(255, 220, 120, 0.22) 0deg 9deg, transparent 9deg 22deg);
+  background: repeating-conic-gradient(from 0deg, rgba(255, 205, 90, 0.35) 0deg 9deg, transparent 9deg 22deg);
   -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 45%); mask-image: radial-gradient(circle, #000 0%, transparent 45%);
   animation: rays 14s linear infinite, fadeIn 1s ease-out both;
 }
@@ -27,7 +27,7 @@
 .confetti {
   position: absolute; left: var(--x); top: -30px;
   animation: fall var(--dur) linear var(--delay) infinite;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
 }
 .firework { position: absolute; width: 0; height: 0; }
 .firework i {
@@ -39,12 +39,12 @@
 /* 真ん中の箱 */
 .res-box {
   position: relative; width: 100%; max-width: 460px; margin: auto; padding: 18px 16px 16px; border-radius: 22px; text-align: center;
-  background: linear-gradient(170deg, rgba(40, 34, 80, 0.95), rgba(14, 15, 34, 0.96));
-  border: 2px solid rgba(255, 211, 110, 0.8);
-  box-shadow: 0 0 0 6px rgba(255, 211, 110, 0.12), 0 0 60px rgba(255, 200, 80, 0.45), 0 20px 60px rgba(0, 0, 0, 0.7);
+  background: radial-gradient(ellipse 90% 60% at 50% 30%, #fdf8ea, #f1e5c6 75%, #e6d4aa); color: var(--text);
+  border: 2px solid #c9a24a;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.6), 0 0 60px rgba(255, 200, 80, 0.6), 0 20px 50px rgba(30, 70, 100, 0.35);
   animation: boxIn 0.9s cubic-bezier(.2, 1.4, .4, 1) both;
 }
-.result.lose .res-box { border-color: rgba(140, 170, 255, 0.5); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7); }
+.result.lose .res-box { border-color: #9fb4cc; box-shadow: 0 20px 50px rgba(30, 70, 100, 0.3); }
 
 /* トロフィー（王冠と宝石） */
 .res-icon { position: relative; display: flex; flex-direction: column; align-items: center; margin-top: -58px; animation: trophy 1s cubic-bezier(.2, 1.6, .4, 1) 0.25s both; }
@@ -64,21 +64,21 @@
 
 .res-title {
   position: relative; margin: 6px 0 2px; font-size: clamp(2.6rem, 14vw, 3.8rem); font-weight: 900; letter-spacing: 0.08em; line-height: 1.1;
-  background: linear-gradient(100deg, #fff6cf 0%, #ffd36e 30%, #fff 45%, #f0b429 60%, #fff6cf 100%);
+  background: linear-gradient(100deg, #e8a92a 0%, #b8700e 30%, #ffe9a0 45%, #b8700e 60%, #e8a92a 100%);
   background-size: 250% 100%;
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  filter: drop-shadow(0 0 14px rgba(255, 200, 80, 0.8)) drop-shadow(0 3px 0 #6a4300);
+  filter: drop-shadow(0 2px 0 #fff) drop-shadow(0 0 12px rgba(255, 200, 80, 0.8));
   animation: titleIn 0.8s cubic-bezier(.2, 1.6, .4, 1) 0.4s both, shimmer 2.4s linear 1.2s infinite;
 }
-.result.lose .res-title { font-size: clamp(1.8rem, 9vw, 2.4rem); background: linear-gradient(180deg, #e6ecff, #8fa6e8); -webkit-background-clip: text; background-clip: text; filter: none; animation: fadeUp 0.8s ease-out 0.2s both; }
-.result.draw .res-title { background: linear-gradient(100deg, #e6ecff, #c9b8ff, #fff, #c9b8ff, #e6ecff); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; }
-.res-sub { font-weight: 800; font-size: 1.05rem; color: #fff; margin-bottom: 12px; animation: fadeIn 0.6s ease-out 0.7s both; }
+.result.lose .res-title { font-size: clamp(1.8rem, 9vw, 2.4rem); background: linear-gradient(180deg, #5f86b8, #2f4f7a); -webkit-background-clip: text; background-clip: text; filter: none; animation: fadeUp 0.8s ease-out 0.2s both; }
+.result.draw .res-title { background: linear-gradient(100deg, #6a78c0, #8e6ac0, #c9b8ff, #8e6ac0, #6a78c0); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; }
+.res-sub { font-weight: 800; font-size: 1.05rem; color: var(--text); margin-bottom: 12px; animation: fadeIn 0.6s ease-out 0.7s both; }
 
 .res-scores { display: flex; align-items: stretch; justify-content: center; gap: 6px; }
 .res-vs { align-self: center; font-weight: 900; color: var(--muted); font-size: 0.9rem; }
 .res-player {
   position: relative; flex: 1 1 0; min-width: 0; padding: 10px 6px 8px; border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06); border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.6); border: 2px solid var(--panel-border);
   animation: fadeUp 0.6s ease-out 0.8s both;
 }
 .res-player.p1 { animation-delay: 0.95s; }
@@ -87,13 +87,13 @@
 .res-medal {
   position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
   padding: 0 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 900; letter-spacing: 0.1em;
-  color: #2a1a00; background: linear-gradient(180deg, #ffe48f, #e8a920); box-shadow: 0 0 12px rgba(255, 200, 60, 0.8);
+  color: #fff; background: linear-gradient(180deg, #f2b53a, #c47a10); box-shadow: 0 0 10px rgba(255, 200, 60, 0.8);
 }
 .res-name { font-weight: 800; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.res-pts { font-size: 2.4rem; font-weight: 900; line-height: 1.1; color: var(--accent); text-shadow: 0 0 12px rgba(255, 211, 110, 0.6); }
+.res-pts { font-family: Georgia, serif; font-size: 2.5rem; font-weight: 700; line-height: 1.1; color: var(--accent-ink); text-shadow: 0 2px 0 #fff; }
 .res-pts small { font-size: 0.9rem; color: var(--muted); margin-left: 2px; }
 .res-meta { font-size: 0.78rem; color: var(--muted); }
-.res-detail { margin: 10px 0 4px; font-size: 0.85rem; color: #d8dbf5; }
+.res-detail { margin: 10px 0 4px; font-size: 0.85rem; color: #4a3d28; }
 .res-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; animation: fadeIn 0.6s ease-out 1.4s both; }
 
 @keyframes rays { to { transform: rotate(360deg); } }

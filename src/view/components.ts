@@ -4,6 +4,7 @@
 import { COLORS, JP } from '../game/constants.ts';
 import type { Card, Noble, TokenColor } from '../game/types.ts';
 import { cardLabel } from '../game/utils.ts';
+import { birdName, birdSVG } from './birds.ts';
 
 /** 宝石のモチーフ（色ごとに形が違う） */
 export function gemShape(color: TokenColor, cls = ''): string {
@@ -32,8 +33,10 @@ export function cardHTML(card: CardLike, opts: CardOptions = {}): string {
   const { attrs = '', cls = '', tag = 'button', badge = '' } = opts;
   const costs = COLORS.filter(c => card.cost[c] > 0)
     .map(c => tokenHTML(c, card.cost[c], 'mini', `title="${JP[c]}${card.cost[c]}"`)).join('');
-  return `<${tag} class="card c-${card.color} ${cls}" ${attrs} aria-label="${cardLabel(card)}">
-    ${gemShape(card.color, 'bg-gem')}
+  // 真ん中に、ボーナスの色とレベルで決まる鳥の絵（15種類）
+  return `<${tag} class="card c-${card.color} ${cls}" ${attrs} aria-label="${cardLabel(card)}・${birdName(card.color, card.level)}">
+    <span class="card-bird">${birdSVG(card.color, card.level)}</span>
+    <span class="card-name">${birdName(card.color, card.level)}</span>
     <div class="card-head"><span class="card-pts">${card.points || ''}</span>${gemShape(card.color)}</div>
     <div class="card-cost">${costs}</div>${badge}
   </${tag}>`;

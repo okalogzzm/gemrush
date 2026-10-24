@@ -1,17 +1,21 @@
 /* ============================================================
-   デザイン（宝石風）
+   デザイン（青空と羊皮紙）
+   ------------------------------------------------------------
+   空色の背景に、鳥カードと同じ生成りの紙のパネルを浮かべる
    ============================================================ */
 :root {
-  --text: #eef0ff;
-  --muted: #a9aed6;
-  --accent: #ffd36e;
-  --panel: rgba(255, 255, 255, 0.05);
-  --panel-border: rgba(255, 255, 255, 0.13);
-  --p0: #4aa3ff;   /* プレイヤー1（あなた）の色 */
-  --p1: #ff9d3d;   /* プレイヤー2（CPU）の色 */
-  --ok: #5dff9a;
-  --ng: #ff7a85;
-  --new: #4fe3ff;   /* 新しく出たカードの印 */
+  --text: #3b2e1a;          /* 文字（こげ茶のインク） */
+  --muted: #86765a;         /* 補足の文字 */
+  --accent: #e0a020;        /* 選択の枠・強調（金） */
+  --accent-ink: #9a5a10;    /* 紙の上で読む強調の文字 */
+  --panel: rgba(252, 247, 233, 0.94);   /* 紙のパネル */
+  --panel-border: #cdbb90;
+  --shadow: 0 2px 8px rgba(40, 80, 110, 0.2);
+  --p0: #2f7fd0;   /* プレイヤー1（あなた）の色 */
+  --p1: #d9762a;   /* プレイヤー2（CPU）の色 */
+  --ok: #2e9e5b;
+  --ng: #c8323e;
+  --new: #16a3c8;  /* 新しく出たカードの印 */
 }
 /* 宝石の色（明るい・中間・暗い の3段階＋光の色＋文字色） */
 .c-white { --c1: #ffffff; --c2: #dde5f2; --c3: #8792ad; --glow: 220, 230, 255; --ink: #1d2233; }
@@ -22,7 +26,7 @@
 .c-gold  { --c1: #fff5b5; --c2: #f0b429; --c3: #855400; --glow: 255, 200, 60;  --ink: #3a2600; }
 
 * { box-sizing: border-box; }
-html { background: #0b0d22; }
+html { background: #bfe3f2; }
 body {
   margin: 0;
   /* ゲーム画面は1画面に収めるので、ページ自体はスクロールさせない（重ねた画面は中でスクロール） */
@@ -30,10 +34,14 @@ body {
   overflow: hidden;
   overscroll-behavior: none;
   color: var(--text);
+  /* 青空と、うすい雲 */
   background:
-    radial-gradient(ellipse 120% 60% at 50% -10%, #3a2a78 0%, transparent 60%),
-    radial-gradient(ellipse 80% 50% at 100% 100%, #1d3a6e 0%, transparent 60%),
-    linear-gradient(180deg, #12142e 0%, #07081a 100%);
+    radial-gradient(ellipse 45% 9% at 22% 18%, rgba(255, 255, 255, 0.75), transparent 70%),
+    radial-gradient(ellipse 35% 7% at 30% 15%, rgba(255, 255, 255, 0.6), transparent 70%),
+    radial-gradient(ellipse 40% 8% at 82% 52%, rgba(255, 255, 255, 0.6), transparent 70%),
+    radial-gradient(ellipse 50% 10% at 15% 86%, rgba(255, 255, 255, 0.55), transparent 70%),
+    linear-gradient(180deg, #8fcbe8 0%, #c4e6f4 45%, #e6f5fa 100%);
+  background-attachment: fixed;
   font-family: system-ui, -apple-system, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
   font-size: 15px;
   -webkit-tap-highlight-color: transparent;

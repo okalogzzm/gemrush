@@ -1,9 +1,9 @@
 /* ===== 貴族タイル ===== */
 .noble {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 6px 10px 8px; min-width: 82px; border-radius: 12px; color: #ffe9a8;
-  background: radial-gradient(circle at 50% 0, rgba(255, 215, 110, 0.35), transparent 60%), linear-gradient(160deg, #4a2c6e, #22133a);
-  border: 1.5px solid rgba(255, 211, 110, 0.7); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  padding: 6px 10px 8px; min-width: 82px; border-radius: 12px; color: #8a5a10;
+  background: radial-gradient(circle at 50% 0, rgba(255, 230, 160, 0.6), transparent 65%), linear-gradient(170deg, #fdf7e6, #ecdcb4);
+  border: 1.5px solid #c9a24a; box-shadow: var(--shadow);
 }
 .noble-top { display: flex; align-items: center; gap: 6px; }
 .crown {
@@ -11,7 +11,7 @@
   clip-path: polygon(0 100%, 0 25%, 25% 60%, 50% 0, 75% 60%, 100% 25%, 100% 100%);
   background: linear-gradient(#fff5b5, #f0b429 60%, #855400);
 }
-.noble .np { font-weight: 900; font-size: 1.2rem; text-shadow: 0 0 8px rgba(255, 211, 110, 0.8); }
+.noble .np { font-weight: 900; font-size: 1.2rem; font-family: Georgia, serif; text-shadow: 0 1px 0 #fff; }
 .noble .req { display: flex; gap: 3px; }
 button.noble { min-height: 70px; }
 /* 横長の小さい貴族（ゲーム画面用）：左に王冠と点、右に条件 */
@@ -41,10 +41,10 @@ button.noble.slim { min-height: 48px; }
 .bank-btn .tok { --size: var(--tok); font-size: 1.1rem; transition: transform 0.12s; }
 .bank-count {
   position: absolute; top: 0; right: max(0px, calc(50% - var(--tok) * 0.7)); min-width: 1.6em; padding: 0 4px; border-radius: 10px;
-  background: rgba(8, 9, 24, 0.9); border: 1px solid rgba(255, 255, 255, 0.4); font-weight: 900; font-size: 0.85rem; z-index: 2;
+  background: #fffaf0; color: var(--text); border: 1px solid #b19e74; font-weight: 900; font-size: 0.85rem; z-index: 2; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .bank-btn.sel .tok { box-shadow: 0 0 0 3px var(--accent), 0 0 18px rgba(255, 211, 110, 0.8), inset 0 -5px 10px rgba(0, 0, 0, 0.45); transform: translateY(-3px); }
-.bank-btn:disabled .tok { filter: saturate(0.6) brightness(0.75); }
+.bank-btn:disabled .tok { filter: saturate(0.7) brightness(0.92); }
 .bank-btn:not(:disabled):active .tok { transform: scale(0.93); }
 .sel-badge {
   position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 3;
@@ -71,45 +71,65 @@ button.noble.slim { min-height: 48px; }
 .card.fit > .new-badge { font-size: calc(var(--u) * 0.72); }
 .card.fit.back > span, .card.fit.empty > span { font-size: clamp(6px, min(22cqw, 15cqh), 16px); line-height: 1.2; }
 .deck > * { font-size: clamp(7px, min(17cqw, 12cqh), 18px); }
+/* カード：生成りの紙に、鳥の絵。左上に得点、右上にボーナスの宝石、下の帯にコスト */
 .card {
-  display: flex; flex-direction: column; justify-content: space-between; text-align: left;
-  padding: 4px 5px; color: #fff;
-  background: radial-gradient(circle at 85% 10%, rgba(var(--glow), 0.55), transparent 58%), linear-gradient(165deg, #2b2f55 0%, #15172c 72%);
-  border: 1.5px solid rgba(var(--glow), 0.6);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  display: block; text-align: left; padding: 0; color: #3b2e1a;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 38%, #fbf4e1 0%, #efe3c4 60%, #dfcea5 100%);
+  border: 1.5px solid var(--c3, #a8956b);
+  box-shadow: 0 3px 8px rgba(40, 70, 90, 0.3), inset 0 0 0 1.5px rgba(255, 250, 232, 0.65);
   transition: transform 0.12s;
 }
 button.card:not(:disabled):active { transform: scale(0.95); }
-.card .bg-gem { position: absolute; right: -14%; bottom: -8%; width: 68%; height: auto; aspect-ratio: 1; opacity: 0.2; }
-.card-head { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; }
-.card-pts { font-size: 1.75em; font-weight: 900; line-height: 1; text-shadow: 0 0 6px rgba(var(--glow), 0.95), 0 2px 2px #000; }
-.card-head .gem-shape { --gs: 1.9em; }
-.card-cost { display: flex; flex-wrap: wrap; gap: 2px; position: relative; z-index: 1; }
-.card-cost .tok { --size: 1.95em; font-size: 1.05em; font-weight: 900; }
+.card-head {
+  position: absolute; top: 3%; left: 7%; right: 6%; z-index: 2;
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.card-pts {
+  font-family: Georgia, "Times New Roman", "Yu Mincho", serif; font-size: 1.9em; font-weight: 700; line-height: 1;
+  color: #3b2e1a; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.card-head .gem-shape { --gs: 1.55em; filter: drop-shadow(0 1px 1px rgba(60, 40, 10, 0.5)); }
+/* 鳥の絵：見出しと帯のあいだいっぱいに */
+.card-bird { position: absolute; left: 2%; right: 0; top: 13%; bottom: 21%; z-index: 1; display: flex; }
+.card-bird svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 1px 1px rgba(60, 40, 10, 0.25)); }
+/* 鳥の名前：大きく出すカード（演出・ルール説明）と、幅の広いカードだけ */
+.card-name {
+  display: none; position: absolute; top: 5%; left: 30%; right: 22%; z-index: 2;
+  font-size: 0.62em; font-weight: 700; color: #5a4a30; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fx-items .card .card-name, .figure .card .card-name, .anatomy .card .card-name { display: block; }
+@container (min-width: 120px) { .card.fit .card-name { display: block; font-size: calc(var(--u) * 0.62); } }
+.card-cost {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; min-height: 21%;
+  display: flex; flex-wrap: wrap; gap: 2px; align-items: center; justify-content: center; padding: 2% 3%;
+  background: linear-gradient(180deg, #ddcfa8, #cbb98d); border-top: 1px solid #b19e74;
+}
+.card-cost .tok { --size: 1.8em; font-size: 1.02em; font-weight: 900; }
 .tok.mini::after { opacity: 0.45; height: 22%; }
 .card.sel, .deck.sel { outline: 3px solid var(--accent); outline-offset: 1px; box-shadow: 0 0 18px rgba(255, 211, 110, 0.7); }
 .card.afford { box-shadow: 0 0 0 2px var(--ok), 0 0 14px rgba(93, 255, 154, 0.55); }
-/* 「買える」は上の真ん中（得点と宝石の間）に出して、コストの数字を隠さない */
+/* 「買える」はコストの帯のすぐ上の右に出して、得点やコストの数字を隠さない */
 .card.afford::after {
-  content: "買える"; position: absolute; left: 50%; top: 3px; transform: translateX(-50%); z-index: 2; white-space: nowrap;
+  content: "買える"; position: absolute; right: 3%; bottom: 23%; z-index: 3; white-space: nowrap;
   background: #1f9d55; color: #fff; font-size: 0.72em; padding: 0 4px; border-radius: 4px; font-weight: 800;
 }
 .card.empty {
-  background: rgba(255, 255, 255, 0.03); border: 1.5px dashed rgba(255, 255, 255, 0.2); box-shadow: none;
+  display: flex; background: rgba(255, 255, 255, 0.35); border: 1.5px dashed #b5a27a; box-shadow: none;
   color: var(--muted); align-items: center; justify-content: center;
 }
 .card.back {
-  background: repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0 6px, transparent 6px 12px), linear-gradient(160deg, #5b3f9e, #261845);
-  border: 1.5px solid rgba(200, 170, 255, 0.5); align-items: center; justify-content: center; text-align: center; font-weight: 800;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 6px, transparent 6px 12px), linear-gradient(160deg, #9a7448, #5e4227);
+  display: flex; color: #fbf4e1; border: 1.5px solid #d9c49a; align-items: center; justify-content: center; text-align: center; font-weight: 800;
 }
 .deck {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #fff; font-weight: 800; padding: 0;
-  background: repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0 6px, transparent 6px 12px), linear-gradient(160deg, var(--d1), var(--d2));
-  border: 1.5px solid rgba(255, 255, 255, 0.28); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #fff; font-weight: 800; padding: 0; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0 6px, transparent 6px 12px), linear-gradient(160deg, var(--d1), var(--d2));
+  border: 1.5px solid rgba(255, 255, 255, 0.7); box-shadow: 0 3px 8px rgba(40, 70, 90, 0.3);
 }
-.deck.lv1 { --d1: #2f8a55; --d2: #10391f; }
-.deck.lv2 { --d1: #c29030; --d2: #553708; }
-.deck.lv3 { --d1: #3d64b8; --d2: #13224d; }
-.deck:disabled { filter: grayscale(0.7) brightness(0.7); }
-.deck-dots { color: var(--accent); letter-spacing: 1px; }
+.deck.lv1 { --d1: #7fae5a; --d2: #44702c; }
+.deck.lv2 { --d1: #d6ae58; --d2: #946a22; }
+.deck.lv3 { --d1: #79a0d0; --d2: #3c6398; }
+.deck:disabled { filter: grayscale(0.5) brightness(0.92); }
+.deck-dots { color: #fff3c4; letter-spacing: 1px; }
 .deck-n { font-weight: 600; opacity: 0.9; }
