@@ -7,6 +7,8 @@
    ルールには触れず、終わった GameState を読むだけ。
    ============================================================ */
 import { settings } from '../app/state.ts';
+import { duckBgm } from '../audio/engine.ts';
+import { sfx } from '../audio/sfx.ts';
 import { COLORS } from '../game/constants.ts';
 import { getPoints } from '../game/rules.ts';
 import type { GameState, TokenColor } from '../game/types.ts';
@@ -48,6 +50,9 @@ export function showResult(game: GameState): void {
   const w = game.result?.winner ?? null;
   const winner = w !== null ? game.players[w] : null;
   const calm = reducedMotion();
+  // 勝敗の音を目立たせるため、そのあいだ BGM は小さくする
+  duckBgm(mood === 'win' ? 4 : 3);
+  sfx(mood);
 
   const title = mood === 'win' ? '勝利！' : mood === 'lose' ? '負けてしまった…' : '引き分け';
   const sub = mood === 'win'

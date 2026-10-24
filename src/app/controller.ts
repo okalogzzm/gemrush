@@ -11,6 +11,8 @@ import {
 } from '../game/rules.ts';
 import type { CardSource, GemColor, Level, Result, TokenColor } from '../game/types.ts';
 import { sameSource } from '../game/utils.ts';
+import { initAudio, setBgm, setSe, sound } from '../audio/engine.ts';
+import { sfx } from '../audio/sfx.ts';
 import { resumeBirds, startBirdMotion } from '../view/birdMotion.ts';
 import { $ } from '../view/dom.ts';
 import { playFx } from '../view/fx.ts';
@@ -18,7 +20,7 @@ import { renderCoach } from '../view/coach.ts';
 import { render, renderDataCheck } from '../view/render.ts';
 import { hideResult, showResult, showResultOnce } from '../view/result.ts';
 import { hideCardTip, initCardTip, showCardTip, toggleCardTip } from '../view/tooltip.ts';
-import { openMenu, openRules, renderStartScreen } from '../view/screens.ts';
+import { openMenu, openRules, renderSoundButtons, renderStartScreen } from '../view/screens.ts';
 import { scheduleCpu, stopCpu } from './cpuRunner.ts';
 import { checkStorage, clearSave, loadSave, saveGame } from './save.ts';
 import { isCpuTurn, resetSelection, settings, showMessage, store, ui } from './state.ts';
@@ -35,6 +37,7 @@ export function refresh(): void {
   render();
   renderCoach();
   resumeBirds();                    // 描き直す前に動いていた鳥は、続きから動かす
+  errorSound();
   // 1手ごと（画面が変わるたび）に自動保存。チュートリアルは練習なので保存しない
   if (!tutorial.active) saveGame(game, settings);
   const fx = ui.fx;
@@ -46,6 +49,14 @@ export function refresh(): void {
   const paused = () => !$('#startScreen').hidden;
   if (tutorial.active) scheduleTutorial(refresh, paused, fxMs);
   else scheduleCpu(refresh, paused, fxMs);
+}
+
+// 新しくエラーのメッセージが出たら「ブブッ」と鳴らす（同じ文でも、出し直したら鳴らす）
+let heardSeq = 0;
+function errorSound(): void {
+  if (ui.msgSeq === heardSeq) return;
+  heardSeq = ui.msgSeq;
+  if (ui.msgType === 'error' && ui.message) sfx('error');
 }
 
 // ルールの行動を実行し、結果に合わせて画面を更新（演出もここで準備）
@@ -93,6 +104,7 @@ function onTapBank(color: TokenColor): void {
     if (game.bank[color] <= 0) { showMessage(`${JP[color]}は残っていません`); return refresh(); }
     ui.tokens = [...sel, color];
   }
+  sfx(ui.tokens.length > sel.length ? 'pick' : 'unpick', { color });
   ui.message = '';
   refresh();
 }
@@ -104,6 +116,7 @@ function onTapCard(src: CardSource): void {
   if (game.phase !== 'action') { showMessage('今はカードを選べません'); return refresh(); }
   ui.tokens = [];
   ui.target = sameSource(ui.target, src) ? null : src;
+  sfx(ui.target ? 'select' : 'tap');
   ui.message = '';
   refresh();
 }
@@ -111,8 +124,11 @@ function onTapCard(src: CardSource): void {
 // CPUの番でも使える操作（メニューや画面の切り替え）
 const ALWAYS_ALLOWED = [
   'newgame', 'start', 'resume', 'rules', 'closeRules', 'menu', 'closeMenu', 'toStart', 'backdrop', 'log', 'closeLog', 'closeResult', 'cardsTip',
-  'tutorial', 'tutNext', 'tutBack', 'tutQuit',
+  'tutorial', 'tutNext', 'tutBack', 'tutQuit', 'toggleBgm', 'toggleSe', 'toggleSound',
 ];
+
+// 押したときに「コツ」と鳴らさない操作（自分の音がある・画面の外側）
+const NO_TAP_SOUND = ['backdrop', 'cardsTip', 'bank', 'card', 'deck', 'reserved', 'take', 'buy', 'reserve', 'discard', 'noble', 'pass'];
 
 const toLevel = (v: string | undefined): Level => (v === '2' ? 2 : v === '3' ? 3 : 1);
 
@@ -142,6 +158,7 @@ function onClick(e: MouseEvent): void {
     refresh();
     return;
   }
+  if (!NO_TAP_SOUND.includes(d.act ?? '')) sfx('tap');
   const game = store.game;
   switch (d.act) {
     case 'start':      startGame(d.level ?? 'normal'); break;
@@ -173,6 +190,10 @@ function onClick(e: MouseEvent): void {
     case 'tutNext':    nextStep(); refresh(); break;
     case 'tutBack':    prevStep(); refresh(); break;
     case 'tutQuit':    showStartScreen(); break;
+    case 'toggleBgm':  setBgm(!sound.bgm); renderSoundButtons(); break;
+    case 'toggleSe':   setSe(!sound.se); renderSoundButtons(); break;
+    // 開始画面のボタンは、BGM と効果音をまとめて切り替える
+    case 'toggleSound': { const on = !(sound.bgm || sound.se); setBgm(on); setSe(on); renderSoundButtons(); break; }
   }
 }
 
@@ -250,4 +271,5 @@ export function init(): void {
   checkStorage();
   showStartScreen();
   startBirdMotion();
+  initAudio();
 }

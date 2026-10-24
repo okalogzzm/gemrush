@@ -41,7 +41,14 @@
 .warn { color: var(--ng) !important; font-size: 0.85rem; }
 
 /* ===== 開始画面：細めのカードを画面の真ん中に（縦の真ん中は .modal-box の margin: auto） ===== */
-.start-box { max-width: 330px; padding: 14px 16px 12px; text-align: center; }
+.start-box { max-width: 330px; padding: 14px 16px 12px; text-align: center; position: relative; }
+/* 音のオン／オフ（右上の角。タイトルの横の空いている所に置いて、縦の長さを増やさない） */
+.sound-btn {
+  position: absolute; top: 8px; right: 8px; z-index: 3; width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 1.25rem; cursor: pointer;
+  background: rgba(255, 252, 240, 0.85); border: 1.5px solid #c9a24a; color: var(--text);
+}
+.sound-btn[aria-pressed="false"] { opacity: 0.7; }
 /* タイトル：枝にとまる小鳥と、金の文字 */
 .title { position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
 .title-bird { display: flex; width: 108px; height: 92px; perspective: 260px; margin-bottom: -10px; }
@@ -94,6 +101,9 @@
   .start-box:has(.resume-box) .level-btn { margin: 3px 0; }
 }
 .menu-list .btn { width: 100%; margin: 6px 0; }
+/* BGM と効果音は横に並べる */
+.sound-row { display: flex; gap: 8px; }
+.sound-row .btn { flex: 1; padding-left: 6px; padding-right: 6px; }
 .save-status { font-size: 0.85rem; color: var(--muted); text-align: center; margin-top: 8px; }
 
 /* ===== ルール説明 ===== */

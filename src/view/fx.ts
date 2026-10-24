@@ -11,8 +11,10 @@
      ③ 貴族が来たら、金色の光と一緒に貴族を大きく出す
      ④ 得点が増えたら、得点の横に「+2点」が浮かぶ
      ⑤ 次が人の番なら「〇〇の番です」を出す
+   それぞれの場面で、効果音も一緒に鳴らします（src/audio/sfx.ts）。
    ============================================================ */
 import { settings, type Fx } from '../app/state.ts';
+import { sfx } from '../audio/sfx.ts';
 import { JP } from '../game/constants.ts';
 import type { Card, GameState, TokenColor } from '../game/types.ts';
 import { cardBackHTML, cardHTML, nobleHTML, tokenHTML } from './components.ts';
@@ -137,7 +139,9 @@ function cardFace(card: Card, pi: number): string {
  * CPUは、この時間だけ待ってから考え始める（演出が重ならないように）。
  */
 export function playFx(fx: Fx | null, game: GameState): number {
-  if (!fx || reducedMotion()) return 0;
+  if (!fx) return 0;
+  // 動きを減らす設定の人には、演出は出さず、音だけで何が起きたかを伝える
+  if (reducedMotion()) { actionSound(fx, game); return 0; }
   clearFx();
   const isCpu = settings.mode === 'cpu' && fx.pi === settings.cpuIndex;
   // 自分の行動は少しだけ短く（テンポよく遊べるように）
@@ -155,9 +159,12 @@ export function playFx(fx: Fx | null, game: GameState): number {
         <div class="fx-items">${sparkles(16)}${cardHTML(card, { cls: 'fx-shine fx-big-card', tag: 'div' })}</div>
         <div class="fx-note">${JP[card.color]}のボーナス +1</div>${pts}
       </div>`, dur, 'fx-center');
+    sfx('buy');
+    if (fx.spent.length) sfx('returnGem', { delayMs: dur * 0.6 });
     const from = cardSlot(fx);
     const bonusEl = seatCell(fx.pi, card.color, '.bonus-card');
     fly(cardHTML(card, { tag: 'div', cls: 'fit' }), from, rectOf(bonusEl), dur * 0.6, 700 * k, () => {
+      sfx('cardLand');
       landFlash(bonusEl);
       ringAt(rectOf(bonusEl));
     });
@@ -177,13 +184,14 @@ export function playFx(fx: Fx | null, game: GameState): number {
         <div class="fx-items"><span class="fx-big-card">${face}</span>${gold ? `<span class="fx-plus">＋</span>${tokenHTML('gold', undefined, 'fx-big-tok')}` : ''}</div>
         <div class="fx-note">${gold ? '金を1個もらった' : '金は品切れ'}${r?.hidden ? '（山札から伏せたまま）' : ''}</div>
       </div>`, dur, 'fx-center');
+    sfx('reserve');
     const seat = seatOf(fx.pi);
     const slots = seat?.querySelectorAll('.reserved > .card:not(.slot)');
     const dest = slots && slots.length ? slots[slots.length - 1] : null;
-    if (r) fly(cardFace(r, fx.pi).replace('class="card', 'class="card fit'), cardSlot(fx), rectOf(dest), dur * 0.6, 700 * k, () => landFlash(dest ?? null));
+    if (r) fly(cardFace(r, fx.pi).replace('class="card', 'class="card fit'), cardSlot(fx), rectOf(dest), dur * 0.6, 700 * k, () => { sfx('cardLand'); landFlash(dest ?? null); });
     if (gold) {
       const goldEl = seatCell(fx.pi, 'gold', '.tok');
-      fly(tokenHTML('gold'), bankTok('gold'), rectOf(goldEl), dur * 0.6 + 120, 650 * k, () => landFlash(goldEl));
+      fly(tokenHTML('gold'), bankTok('gold'), rectOf(goldEl), dur * 0.6 + 120, 650 * k, () => { sfx('gold'); landFlash(goldEl); });
     }
     t = dur * 0.6 + 760 * k;
   } else if (fx.tokens.length) {
@@ -195,14 +203,19 @@ export function playFx(fx: Fx | null, game: GameState): number {
         <div class="fx-what">${what}</div>
         <div class="fx-items">${fx.tokens.map((c, i) => tokenHTML(c, undefined, 'fx-big-tok', `style="animation-delay:${i * 90}ms"`)).join('')}</div>
       </div>`, dur, 'fx-center');
+    sfx('take', { colors: fx.tokens });
     fx.tokens.forEach((c, i) => {
       const dest = seatCell(fx.pi, c, '.tok');
       fly(tokenHTML(c), bankTok(c), rectOf(dest), dur * 0.58 + i * 90, 650 * k, () => {
+        sfx('gemLand', { color: c });
         landFlash(dest);
         ringAt(rectOf(dest));
       });
     });
     t = dur * 0.58 + 650 * k + fx.tokens.length * 90;
+  } else if (fx.spent.length) {
+    // ===== 宝石を返した（10個をこえたとき） =====
+    sfx('returnGem');
   }
 
   // ===== 貴族が来た =====
@@ -211,6 +224,7 @@ export function playFx(fx: Fx | null, game: GameState): number {
     const start = t ? t - 150 : 0;
     const dur = 1700;
     later(start, () => {
+      sfx('noble');
       spawnFx(`<div class="fx-flash"></div><div class="fx-ann noble p${fx.pi}" style="--dur:${dur}ms">${who}
           <div class="fx-what">貴族が訪問！</div>
           <div class="fx-items">${sparkles(24, 1.4)}<span class="fx-big-noble">${nobleHTML(noble)}</span></div>
@@ -230,6 +244,7 @@ export function playFx(fx: Fx | null, game: GameState): number {
     const ptsEl = seatOf(fx.pi)?.querySelector('.pts') ?? null;
     later(Math.max(0, t - 200), () => {
       const r = rectOf(ptsEl);
+      sfx('points');
       if (!r) return;
       const el = spawnFx(`<span class="fx-float p${fx.pi}">+${gained}点</span>`, 1300, 'fx-at');
       Object.assign(el.style, { left: `${r.left + r.width / 2}px`, top: `${r.top}px` });
@@ -243,9 +258,24 @@ export function playFx(fx: Fx | null, game: GameState): number {
     const next = game.players[game.current];
     const nextIsHuman = settings.mode === 'pvp' || game.current !== settings.cpuIndex;
     if (next && nextIsHuman) {
-      later(t, () => spawnFx(`<div class="fx-turn p${game.current}"><span class="turn-dot p${game.current}"></span>${next.name}の番です</div>`, 1100, 'fx-center'));
+      later(t, () => {
+        sfx('yourTurn');
+        spawnFx(`<div class="fx-turn p${game.current}"><span class="turn-dot p${game.current}"></span>${next.name}の番です</div>`, 1100, 'fx-center');
+      });
       t += 500;
     }
   }
   return Math.round(t);
+}
+
+// 演出を出さないとき（動きを減らす設定）の音。何が起きたかが分かる音を1つずつ、少しずらして鳴らす
+function actionSound(fx: Fx, game: GameState): void {
+  let at = 0;
+  if (fx.cards.length) { sfx('buy'); at = 500; }
+  else if (fx.reserved) { sfx('reserve'); if (fx.tokens.includes('gold')) sfx('gold', { delayMs: 250 }); at = 500; }
+  else if (fx.tokens.length) { sfx('take', { colors: fx.tokens }); at = 500; }
+  else if (fx.spent.length) { sfx('returnGem'); at = 300; }
+  if (fx.nobles.length) { sfx('noble', { delayMs: at }); at += 1200; }
+  const nextIsHuman = settings.mode === 'pvp' || game.current !== settings.cpuIndex;
+  if (game.phase === 'action' && game.current !== fx.pi && nextIsHuman) sfx('yourTurn', { delayMs: at });
 }

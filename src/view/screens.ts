@@ -2,6 +2,7 @@
    重ねて表示する画面（開始画面・メニュー・ルール説明）
    ============================================================ */
 import { saveStatus, type SaveData } from '../app/save.ts';
+import { sound } from '../audio/engine.ts';
 import { CPU_LEVELS } from '../cpu/index.ts';
 import { COLORS, JP } from '../game/constants.ts';
 import { getPoints } from '../game/rules.ts';
@@ -31,6 +32,7 @@ export function renderStartScreen(save: SaveData | null): void {
   const level = (lv: string, color: GemColor, name: string, note: string) =>
     `<button class="level-btn" data-act="start" data-level="${lv}">${gemShape(color)}<span><b>${name}</b><small>${note}</small></span></button>`;
   $('#startScreen').innerHTML = `<div class="modal-box start-box">
+    <button class="sound-btn" id="soundBtn" data-act="toggleSound"></button>
     <div class="title">
       <span class="title-bird">${birdSVG('blue', 2, 1)}</span>
       <h1 class="title-main">Splender</h1>
@@ -49,6 +51,20 @@ export function renderStartScreen(save: SaveData | null): void {
     <button class="btn link-btn" data-act="rules">📖 ルール説明</button>
     ${warn}
   </div>`;
+  renderSoundButtons();
+}
+
+/** 音のボタンの表示を、今の設定に合わせる（開始画面とメニュー） */
+export function renderSoundButtons(): void {
+  const any = sound.bgm || sound.se;
+  const btn = document.querySelector<HTMLElement>('#soundBtn');
+  if (btn) {
+    btn.textContent = any ? '🔊' : '🔇';
+    btn.setAttribute('aria-label', any ? '音を消す' : '音を出す');
+    btn.setAttribute('aria-pressed', String(any));
+  }
+  $('#bgmBtn').textContent = `🎵 BGM：${sound.bgm ? 'オン' : 'オフ'}`;
+  $('#seBtn').textContent = `🔔 効果音：${sound.se ? 'オン' : 'オフ'}`;
 }
 
 // ---------- メニュー ----------
@@ -57,6 +73,7 @@ export function openMenu(): void {
   if (saveStatus.ok === true) el.textContent = '💾 1手ごとに自動保存しています';
   else if (saveStatus.ok === false) el.textContent = '⚠️ このブラウザでは保存できません（ゲームはそのまま遊べます）';
   else el.textContent = '';
+  renderSoundButtons();
   $('#menuScreen').hidden = false;
 }
 

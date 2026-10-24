@@ -34,6 +34,7 @@ src/
   cpu/         CPU。moves（合法手） / heuristics（評価） / strategies（強さ別） / pending（返却・貴族選択）
   app/         アプリの状態と流れ。state / controller（タップ受付・refresh） / cpuRunner / tracker（直前の変化） / save / tutorial（チュートリアルの流れ）
   view/        HTML を作る部分。components / birds（3Dで動く小鳥） / render / screens（開始・メニュー・ルール） / coach（チュートリアルの吹き出し） / fx（演出） / result（勝敗の画面）
+  audio/       音（BGM・効果音）。音のファイルは使わず Web Audio で作る。engine（出口・オン／オフ） / bgm（曲） / sfx（効果音） / synth（音を作る道具） / settings（設定の保存）
   styles/      CSS（index.css から読み込む）
   main.ts      入口 / pwa.ts  Service Worker の登録
 public/        そのまま公開する物（manifest.webmanifest、icons/）
