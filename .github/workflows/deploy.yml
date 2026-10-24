@@ -1,0 +1,51 @@
+# main に送ると、テスト → ビルド → GitHub Pages に公開 を自動で行う
+# ※ 最初に1回だけ、GitHub のリポジトリの Settings → Pages →
+#   「Build and deployment」の Source を「GitHub Actions」に変えておくこと
+name: テストして公開
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 道具を入れる
+        run: npm install --no-audit --no-fund
+      - name: 型チェック
+        run: npm run typecheck
+      - name: テスト
+        run: npm test
+      - name: ビルド
+        run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

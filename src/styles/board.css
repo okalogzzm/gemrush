@@ -1,0 +1,115 @@
+/* ===== 貴族タイル ===== */
+.noble {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 6px 10px 8px; min-width: 82px; border-radius: 12px; color: #ffe9a8;
+  background: radial-gradient(circle at 50% 0, rgba(255, 215, 110, 0.35), transparent 60%), linear-gradient(160deg, #4a2c6e, #22133a);
+  border: 1.5px solid rgba(255, 211, 110, 0.7); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+.noble-top { display: flex; align-items: center; gap: 6px; }
+.crown {
+  width: 28px; height: 17px; display: inline-block;
+  clip-path: polygon(0 100%, 0 25%, 25% 60%, 50% 0, 75% 60%, 100% 25%, 100% 100%);
+  background: linear-gradient(#fff5b5, #f0b429 60%, #855400);
+}
+.noble .np { font-weight: 900; font-size: 1.2rem; text-shadow: 0 0 8px rgba(255, 211, 110, 0.8); }
+.noble .req { display: flex; gap: 3px; }
+button.noble { min-height: 70px; }
+/* 横長の小さい貴族（ゲーム画面用）：左に王冠と点、右に条件 */
+.noble.slim { flex-direction: row; justify-content: center; gap: 6px; padding: 4px 6px; min-width: 0; border-radius: 10px; }
+.noble.slim .noble-top { flex-direction: column; gap: 0; }
+.noble.slim .crown { width: 20px; height: 12px; }
+.noble.slim .np { font-size: 0.95rem; line-height: 1; }
+.noble.slim .req-chip { width: 1.5em; height: 1.75em; font-size: 0.85rem; }
+button.noble.slim { min-height: 48px; }
+/* 四角いチップ＝カードのボーナス（トークンとは区別） */
+.req-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.75em; height: 2em; border-radius: 4px; font-weight: 800; font-size: 0.9rem;
+  background: linear-gradient(160deg, var(--c1), var(--c2) 50%, var(--c3));
+  color: var(--ink); border: 1px solid rgba(255, 255, 255, 0.45);
+}
+#nobles { display: flex; gap: 6px; align-items: stretch; }
+#nobles .noble { flex: 1 1 0; }
+.nobles-note { flex: none; align-self: center; font-size: 0.68rem; line-height: 1.25; color: var(--muted); text-align: center; }
+
+/* ===== 銀行（場のトークン） ===== */
+#bank { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.bank-btn {
+  position: relative; background: none; border: none; padding: 3px 0 1px;
+  display: flex; align-items: center; justify-content: center; min-height: 44px;
+}
+.bank-btn .tok { --size: var(--tok); font-size: 1.1rem; transition: transform 0.12s; }
+.bank-count {
+  position: absolute; top: 0; right: max(0px, calc(50% - var(--tok) * 0.7)); min-width: 1.6em; padding: 0 4px; border-radius: 10px;
+  background: rgba(8, 9, 24, 0.9); border: 1px solid rgba(255, 255, 255, 0.4); font-weight: 900; font-size: 0.85rem; z-index: 2;
+}
+.bank-btn.sel .tok { box-shadow: 0 0 0 3px var(--accent), 0 0 18px rgba(255, 211, 110, 0.8), inset 0 -5px 10px rgba(0, 0, 0, 0.45); transform: translateY(-3px); }
+.bank-btn:disabled .tok { filter: saturate(0.6) brightness(0.75); }
+.bank-btn:not(:disabled):active .tok { transform: scale(0.93); }
+.sel-badge {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 3;
+  background: var(--accent); color: #2a1a00; border-radius: 10px; padding: 0 7px; font-size: 0.85rem; font-weight: 900;
+}
+
+/* ===== 発展カード ===== */
+/* 3段を、使える高さいっぱいに等分する */
+#cardRows { display: grid; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: var(--gap); }
+.row { display: grid; grid-template-columns: minmax(0, 0.72fr) repeat(4, minmax(0, 1fr)); gap: var(--gap); min-height: 0; }
+.card, .deck {
+  position: relative; aspect-ratio: 3 / 4; border-radius: 10px; min-width: 0; overflow: hidden;
+  font-size: clamp(10px, 2.9vw, 15px);
+}
+/* 枠の大きさに合わせるカード（場・予約）：文字の大きさをカード自身の大きさから決める */
+.card.fit, .deck {
+  aspect-ratio: auto; width: 100%; height: 100%;
+  container-type: size;
+  border-radius: clamp(5px, 8%, 10px);
+}
+.card.fit { --u: clamp(6px, min(13.5cqw, 14.5cqh), 22px); padding: 6% 7%; }
+.card.fit > .card-head, .card.fit > .card-cost { font-size: var(--u); }
+.card.fit::after { font-size: calc(var(--u) * 0.8); }
+.card.fit > .new-badge { font-size: calc(var(--u) * 0.72); }
+.card.fit.back > span, .card.fit.empty > span { font-size: clamp(6px, min(22cqw, 15cqh), 16px); line-height: 1.2; }
+.deck > * { font-size: clamp(7px, min(17cqw, 12cqh), 18px); }
+.card {
+  display: flex; flex-direction: column; justify-content: space-between; text-align: left;
+  padding: 4px 5px; color: #fff;
+  background: radial-gradient(circle at 85% 10%, rgba(var(--glow), 0.55), transparent 58%), linear-gradient(165deg, #2b2f55 0%, #15172c 72%);
+  border: 1.5px solid rgba(var(--glow), 0.6);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition: transform 0.12s;
+}
+button.card:not(:disabled):active { transform: scale(0.95); }
+.card .bg-gem { position: absolute; right: -14%; bottom: -8%; width: 68%; height: auto; aspect-ratio: 1; opacity: 0.2; }
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; }
+.card-pts { font-size: 1.75em; font-weight: 900; line-height: 1; text-shadow: 0 0 6px rgba(var(--glow), 0.95), 0 2px 2px #000; }
+.card-head .gem-shape { --gs: 1.9em; }
+.card-cost { display: flex; flex-wrap: wrap; gap: 2px; position: relative; z-index: 1; }
+.card-cost .tok { --size: 1.95em; font-size: 1.05em; font-weight: 900; }
+.tok.mini::after { opacity: 0.45; height: 22%; }
+.card.sel, .deck.sel { outline: 3px solid var(--accent); outline-offset: 1px; box-shadow: 0 0 18px rgba(255, 211, 110, 0.7); }
+.card.afford { box-shadow: 0 0 0 2px var(--ok), 0 0 14px rgba(93, 255, 154, 0.55); }
+/* 「買える」は上の真ん中（得点と宝石の間）に出して、コストの数字を隠さない */
+.card.afford::after {
+  content: "買える"; position: absolute; left: 50%; top: 3px; transform: translateX(-50%); z-index: 2; white-space: nowrap;
+  background: #1f9d55; color: #fff; font-size: 0.72em; padding: 0 4px; border-radius: 4px; font-weight: 800;
+}
+.card.empty {
+  background: rgba(255, 255, 255, 0.03); border: 1.5px dashed rgba(255, 255, 255, 0.2); box-shadow: none;
+  color: var(--muted); align-items: center; justify-content: center;
+}
+.card.back {
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0 6px, transparent 6px 12px), linear-gradient(160deg, #5b3f9e, #261845);
+  border: 1.5px solid rgba(200, 170, 255, 0.5); align-items: center; justify-content: center; text-align: center; font-weight: 800;
+}
+.deck {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #fff; font-weight: 800; padding: 0;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0 6px, transparent 6px 12px), linear-gradient(160deg, var(--d1), var(--d2));
+  border: 1.5px solid rgba(255, 255, 255, 0.28); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+.deck.lv1 { --d1: #2f8a55; --d2: #10391f; }
+.deck.lv2 { --d1: #c29030; --d2: #553708; }
+.deck.lv3 { --d1: #3d64b8; --d2: #13224d; }
+.deck:disabled { filter: grayscale(0.7) brightness(0.7); }
+.deck-dots { color: var(--accent); letter-spacing: 1px; }
+.deck-n { font-weight: 600; opacity: 0.9; }

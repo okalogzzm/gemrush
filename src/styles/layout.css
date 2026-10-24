@@ -1,0 +1,73 @@
+/* ============================================================
+   全体レイアウト：スクロールしなくても、1画面に全部が入るように並べる
+   ------------------------------------------------------------
+   ・画面の高さ（100dvh）に合わせて格子状に並べ、余った高さを発展カードに回す
+   ・大きさは画面の幅と高さの小さい方に合わせて決める（--tok・--chip）
+   ・縦持ち：上から 手番／相手／貴族／宝石／カード／自分／操作
+   ・横持ち：左に貴族とカード、右に 手番／相手／宝石／自分／操作
+   ============================================================ */
+#game {
+  --gap: 5px;
+  /* 場の宝石トークンの大きさ */
+  --tok: clamp(34px, min(11vw, 6dvh), 64px);
+  /* 手元のトークンの大きさ（ボーナス・予約カードもこれに合わせる） */
+  --chip: clamp(22px, min(7.4vw, 3.9dvh), 44px);
+  height: 100vh; height: 100dvh;
+  max-width: 760px; margin: 0 auto;
+  display: grid; gap: var(--gap);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto;
+  grid-template-areas: "banner" "opp" "nobles" "bank" "cards" "me" "controls";
+  padding:
+    max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+    max(4px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+}
+#banner { grid-area: banner; }
+#opp { grid-area: opp; }
+#nobles { grid-area: nobles; }
+#bank { grid-area: bank; }
+#cardRows { grid-area: cards; }
+#me { grid-area: me; }
+#controls { grid-area: controls; }
+#game > * { min-width: 0; min-height: 0; }
+
+/* 横持ち（パソコンも含む） */
+@media (orientation: landscape) {
+  #game {
+    --tok: clamp(30px, min(5.4vw, 10dvh), 64px);
+    --chip: clamp(20px, min(3.3vw, 6.6dvh), 44px);
+    max-width: min(1400px, calc(100dvh * 2.2));
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, 1fr);
+    grid-template-rows: auto auto auto auto minmax(0, 1fr);
+    grid-template-areas: "nobles banner" "cards opp" "cards bank" "cards me" "cards controls";
+    column-gap: 10px;
+  }
+  #game > #controls { overflow-y: auto; min-height: 0; }
+}
+
+/* 背の低い縦長の画面（小さなスマホ＋ブラウザのバー）：少し詰める */
+@media (orientation: portrait) and (max-height: 640px) {
+  #game { --gap: 4px; --chip: clamp(20px, min(6.8vw, 3.6dvh), 44px); --tok: clamp(32px, min(10vw, 5.6dvh), 64px); }
+}
+
+/* ===== 上部：手番の表示 ===== */
+#banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 2px 4px 2px 10px; border-radius: 12px;
+  background: rgba(10, 12, 32, 0.7);
+  border: 1px solid rgba(255, 211, 110, 0.25);
+}
+#banner.p0 { box-shadow: inset 5px 0 0 var(--p0), 0 0 14px rgba(74, 163, 255, 0.3); }
+#banner.p1 { box-shadow: inset 5px 0 0 var(--p1), 0 0 14px rgba(255, 157, 61, 0.3); }
+.turn-wrap { display: flex; align-items: baseline; gap: 8px; min-width: 0; flex-wrap: wrap; }
+.turn-dot { width: 12px; height: 12px; border-radius: 50%; flex: none; align-self: center; }
+.turn-dot.p0 { background: var(--p0); box-shadow: 0 0 10px var(--p0); }
+.turn-dot.p1 { background: var(--p1); box-shadow: 0 0 10px var(--p1); }
+#banner .turn { font-size: 1.2rem; font-weight: 900; line-height: 1.2; white-space: nowrap; }
+#banner .turn .thinking { font-size: 0.85rem; }
+#banner .sub { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+#banner .sub b { color: var(--accent); }
+.icon-btn {
+  min-height: 44px; padding: 6px 12px; border-radius: 10px; white-space: nowrap; flex: none;
+  background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.3); color: #fff; font-weight: 700;
+}

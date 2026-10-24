@@ -1,0 +1,80 @@
+/* ============================================================
+   直前の変化の表示（だれが何を取ったか・新しく出たカード）
+   ============================================================ */
+
+/* ===== NEW：前の自分の手番から新しく並んだカード ===== */
+.card.is-new {
+  outline: 2px solid var(--new);
+  outline-offset: 1px;
+  animation: newGlow 1.6s ease-in-out 3;
+}
+.card.is-new.sel { outline-color: var(--accent); }
+.new-badge {
+  position: absolute; top: 36%; left: 3px; z-index: 3;
+  padding: 0 4px; border-radius: 4px;
+  font-size: 0.66em; font-weight: 900; letter-spacing: 0.04em; line-height: 1.5;
+  color: #00303a; background: linear-gradient(180deg, #b6fbff, var(--new));
+  box-shadow: 0 0 8px rgba(80, 230, 255, 0.8);
+  pointer-events: none;
+}
+.new-badge.inline { position: static; display: inline-block; font-size: 0.75rem; margin-right: 2px; vertical-align: middle; }
+.reserved .card.is-new { outline-width: 2px; }
+
+/* ===== 銀行：直前の手番で取られた数 ===== */
+.took-tag {
+  position: absolute; top: 0; left: 4%; z-index: 2;
+  min-width: 1.6em; padding: 0 4px; border-radius: 10px;
+  font-weight: 900; font-size: 0.85rem; color: #1a1205;
+  background: var(--pc, var(--p1)); box-shadow: 0 0 8px var(--pc, var(--p1));
+}
+.took-tag.p0 { --pc: var(--p0); }
+.took-tag.p1 { --pc: var(--p1); }
+
+/* ===== プレイヤー情報：直前の手番で増えたもの ===== */
+.chip-wrap, .bonus-wrap { position: relative; display: inline-flex; }
+.got-tag {
+  position: absolute; top: -6px; right: -8px; z-index: 2;
+  padding: 0 4px; border-radius: 8px;
+  font-size: 0.72rem; font-weight: 900; line-height: 1.35; color: #1a1205;
+  background: var(--pc); box-shadow: 0 0 6px var(--pc);
+}
+.player.p0 { --pc: var(--p0); }
+.player.p1 { --pc: var(--p1); }
+.chip-wrap.was-got .tok { box-shadow: 0 0 0 2px var(--pc), 0 0 12px var(--pc), inset 0 -5px 10px rgba(0, 0, 0, 0.45); }
+.bonus-card.was-got { box-shadow: 0 0 0 2px var(--pc), 0 0 10px var(--pc); }
+
+/* ===== 操作パネルの上：「直前」の欄 ===== */
+#recentBar[hidden] { display: none; }
+/* 1行に収める（長い文は … で省略。全文は対戦ログで見られる） */
+#recentBar.recent {
+  display: flex; align-items: center; gap: 6px 8px;
+  margin-bottom: 4px; padding: 2px 8px; border-radius: 8px; flex-wrap: nowrap;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--panel-border); border-left: 4px solid var(--pc);
+  font-size: 0.82rem;
+}
+.recent.p0 { --pc: var(--p0); }
+.recent.p1 { --pc: var(--p1); }
+.recent-tag {
+  flex: none; padding: 1px 7px; border-radius: 6px;
+  font-size: 0.75rem; font-weight: 900; color: #10121f; background: var(--pc);
+}
+.recent-items { display: inline-flex; align-items: center; gap: 5px; flex: none; }
+.recent-toks { display: inline-flex; gap: 3px; }
+.recent-toks .tok { --size: 20px; }
+.recent .card.recent-card { display: inline-flex; flex: none; width: 24px; font-size: 5px; padding: 1px 2px; border-radius: 4px; border-width: 1px; }
+.recent .card.back.recent-card { font-size: 9px; }
+.recent .noble.recent-noble { min-width: 0; padding: 2px 6px; gap: 2px; font-size: 0.7rem; }
+.recent .noble.recent-noble .crown { width: 16px; height: 10px; }
+.recent .noble.recent-noble .np { font-size: 0.85rem; }
+.recent .noble.recent-noble .req-chip { width: 1.4em; height: 1.6em; font-size: 0.7rem; }
+.recent-text { flex: 1 1 auto; min-width: 0; color: #d8dbf5; line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ===== 対戦ログ：直前の手番の行 ===== */
+#log li.recent-log { color: #fff; font-weight: 700; }
+#log li.recent-log.p0::marker { color: var(--p0); }
+#log li.recent-log.p1::marker { color: var(--p1); }
+
+@keyframes newGlow {
+  50% { box-shadow: 0 0 14px rgba(80, 230, 255, 0.85), 0 4px 10px rgba(0, 0, 0, 0.5); }
+}
+

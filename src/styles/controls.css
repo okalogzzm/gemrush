@@ -1,0 +1,58 @@
+/* ===== 下部：操作パネル ===== */
+#controls {
+  position: relative; z-index: 15;
+  min-height: 112px;
+  background: rgba(10, 12, 32, 0.94);
+  border: 1px solid rgba(255, 211, 110, 0.4); border-radius: 12px; box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.45);
+  padding: 6px 8px;
+  font-size: 0.9rem;
+}
+/* 理由などのメッセージ：画面を押し広げないよう、操作パネルの上に浮かべて少したったら消す */
+#message {
+  position: fixed; left: 0; right: 0; margin: 0 auto; width: min(calc(100vw - 24px), 440px);
+  bottom: max(150px, 24dvh); z-index: 30;
+  padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 0.92rem; text-align: center;
+  background: rgba(20, 22, 48, 0.97); border: 1.5px solid currentColor; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  pointer-events: none; opacity: 0; visibility: hidden;
+}
+#message.show { visibility: visible; animation: toast 3.2s ease-out forwards; }
+#message.error { color: var(--ng); }
+#message.info { color: var(--ok); }
+.ctrl-line { line-height: 1.4; }
+.ctrl-row { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-top: 5px; }
+.btn {
+  min-height: 46px; padding: 6px 16px; border-radius: 12px; font-weight: 800;
+  background: rgba(255, 255, 255, 0.08); color: #fff; border: 1.5px solid rgba(255, 255, 255, 0.3);
+}
+.btn.primary {
+  background: linear-gradient(180deg, #ffe48f, #e8a920); color: #2a1a00; border-color: #ffe48f;
+  box-shadow: 0 0 14px rgba(255, 200, 60, 0.4);
+}
+.btn:not(:disabled):active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.35; box-shadow: none; }
+.btn.big { width: 100%; font-size: 1.1rem; }
+.ng { color: var(--ng); font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.85rem; }
+.sel-tokens { display: inline-flex; gap: 4px; vertical-align: middle; margin: 0 4px; }
+.sel-tokens .tok { --size: 26px; }
+
+@keyframes toast {
+  0% { opacity: 0; transform: translateY(8px); }
+  8%, 80% { opacity: 1; transform: none; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+/* ===== 対戦ログ（メニューから開く） ===== */
+#logScreen .modal-box { max-width: 560px; padding-top: 0; }
+#log {
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 12px;
+  margin: 0 0 8px; padding: 8px 8px 8px 2.6em; font-size: 0.88rem; color: #d8dbf5;
+}
+#log li { margin: 3px 0; }
+#log li::marker { color: var(--muted); }
+
+/* ===== カードデータ確認（メニューの中の折りたたみ） ===== */
+#dataCheck { margin-top: 12px; font-size: 0.78rem; background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px; padding: 4px 8px; color: var(--muted); }
+#dataCheck summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; }
+#dataCheck table { border-collapse: collapse; margin-top: 4px; }
+#dataCheck td, #dataCheck th { border: 1px solid var(--panel-border); padding: 1px 6px; text-align: center; }

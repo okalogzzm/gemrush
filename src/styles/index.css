@@ -1,0 +1,11 @@
+/* 見た目（ビルドで1つのファイルにまとめられる） */
+@import './base.css';
+@import './gems.css';
+@import './layout.css';
+@import './board.css';
+@import './player.css';
+@import './controls.css';
+@import './screens.css';
+@import './recent.css';
+@import './result.css';
+@import './fx.css'; /* 「動きを減らす」設定の指定があるので最後に読む */

@@ -1,0 +1,51 @@
+/* ============================================================
+   デザイン（宝石風）
+   ============================================================ */
+:root {
+  --text: #eef0ff;
+  --muted: #a9aed6;
+  --accent: #ffd36e;
+  --panel: rgba(255, 255, 255, 0.05);
+  --panel-border: rgba(255, 255, 255, 0.13);
+  --p0: #4aa3ff;   /* プレイヤー1（あなた）の色 */
+  --p1: #ff9d3d;   /* プレイヤー2（CPU）の色 */
+  --ok: #5dff9a;
+  --ng: #ff7a85;
+  --new: #4fe3ff;   /* 新しく出たカードの印 */
+}
+/* 宝石の色（明るい・中間・暗い の3段階＋光の色＋文字色） */
+.c-white { --c1: #ffffff; --c2: #dde5f2; --c3: #8792ad; --glow: 220, 230, 255; --ink: #1d2233; }
+.c-blue  { --c1: #a3d3ff; --c2: #2e6ee6; --c3: #0b2870; --glow: 70, 140, 255;  --ink: #fff; }
+.c-green { --c1: #aaf6c4; --c2: #1aa658; --c3: #064d28; --glow: 40, 210, 120;  --ink: #fff; }
+.c-red   { --c1: #ffb3b7; --c2: #e3283d; --c3: #660613; --glow: 255, 70, 90;   --ink: #fff; }
+.c-black { --c1: #a3a3b8; --c2: #3b3b4c; --c3: #0a0a11; --glow: 170, 170, 200; --ink: #fff; }
+.c-gold  { --c1: #fff5b5; --c2: #f0b429; --c3: #855400; --glow: 255, 200, 60;  --ink: #3a2600; }
+
+* { box-sizing: border-box; }
+html { background: #0b0d22; }
+body {
+  margin: 0;
+  /* ゲーム画面は1画面に収めるので、ページ自体はスクロールさせない（重ねた画面は中でスクロール） */
+  height: 100vh; height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  color: var(--text);
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, #3a2a78 0%, transparent 60%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, #1d3a6e 0%, transparent 60%),
+    linear-gradient(180deg, #12142e 0%, #07081a 100%);
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+  font-size: 15px;
+  -webkit-tap-highlight-color: transparent;
+}
+/* タブレット・パソコン：画面が広いので、文字も少し大きくする */
+@media (min-width: 700px) and (min-height: 700px) {
+  html { font-size: 19px; }
+  body { font-size: 18px; }
+}
+button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+button:disabled { cursor: not-allowed; }
+h2 {
+  font-size: 0.8rem; margin: 12px 0 6px; color: var(--muted);
+  letter-spacing: 0.08em; font-weight: 700;
+}

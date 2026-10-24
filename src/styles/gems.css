@@ -1,0 +1,36 @@
+/* ===== 宝石トークン（グラデーション＋光沢で立体的に） ===== */
+.tok {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: var(--size, 40px); height: var(--size, 40px); border-radius: 50%; padding: 0;
+  background: radial-gradient(circle at 32% 28%, var(--c1) 0%, var(--c2) 48%, var(--c3) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.45), inset 0 3px 6px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(0, 0, 0, 0.55);
+  color: var(--ink); font-weight: 800;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+/* 内側の点線リング */
+.tok::before {
+  content: ""; position: absolute; inset: 13%; border-radius: 50%;
+  border: 1.5px dashed rgba(255, 255, 255, 0.4); pointer-events: none;
+}
+/* 左上の光沢 */
+.tok::after {
+  content: ""; position: absolute; top: 9%; left: 20%; width: 45%; height: 28%; border-radius: 50%;
+  background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0)); pointer-events: none;
+}
+.tok.mini::before { display: none; }
+.tok.mini { border-width: 1px; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.45), inset 0 1px 3px rgba(255,255,255,0.4), 0 1px 3px rgba(0,0,0,0.5); }
+
+/* ===== 宝石のモチーフ（CSSだけで描く。色ごとに形も変える） ===== */
+.gem-shape {
+  display: inline-block; flex: none; width: var(--gs, 20px); height: var(--gs, 20px);
+  background: conic-gradient(from 20deg at 50% 45%,
+    var(--c1), var(--c2) 15%, var(--c3) 30%, var(--c2) 45%, var(--c1) 55%, var(--c2) 70%, var(--c3) 85%, var(--c1));
+}
+.s-white { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }                                       /* ひし形 */
+.s-blue  { clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%); }                      /* 六角形 */
+.s-green { clip-path: polygon(28% 0, 72% 0, 100% 28%, 100% 72%, 72% 100%, 28% 100%, 0 72%, 0 28%); }     /* 八角形 */
+.s-red   { clip-path: polygon(20% 8%, 80% 8%, 100% 38%, 50% 100%, 0 38%); }                              /* ブリリアント型 */
+.s-black { clip-path: polygon(50% 0, 100% 38%, 81% 100%, 19% 100%, 0 38%); }                             /* 五角形 */
+.s-gold  { clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); } /* 星 */
+.tok .gem-shape { --gs: 46%; position: relative; z-index: 1; }
