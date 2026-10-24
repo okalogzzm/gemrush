@@ -11,6 +11,7 @@ import {
 } from '../game/rules.ts';
 import type { CardSource, GemColor, Level, Result, TokenColor } from '../game/types.ts';
 import { sameSource } from '../game/utils.ts';
+import { resumeBirds, startBirdMotion } from '../view/birdMotion.ts';
 import { $ } from '../view/dom.ts';
 import { playFx } from '../view/fx.ts';
 import { renderCoach } from '../view/coach.ts';
@@ -33,6 +34,7 @@ export function refresh(): void {
   syncTutorial(game);               // チュートリアル中は、手番に合わせて案内を進める
   render();
   renderCoach();
+  resumeBirds();                    // 描き直す前に動いていた鳥は、続きから動かす
   // 1手ごと（画面が変わるたび）に自動保存。チュートリアルは練習なので保存しない
   if (!tutorial.active) saveGame(game, settings);
   const fx = ui.fx;
@@ -247,4 +249,5 @@ export function init(): void {
   renderDataCheck();
   checkStorage();
   showStartScreen();
+  startBirdMotion();
 }

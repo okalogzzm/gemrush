@@ -118,12 +118,9 @@ const SCALLOPS = [0, 1, 2].flatMap(r => [0, 1, 2, 3].map(c => {
   return `M${x.toFixed(1)},${y.toFixed(1)} q2.3,2.6 4.6,0`;
 })).join(' ');
 
-// 鳥が動く1周の秒数（board.css の birdTurn・birdHop と同じ）
-const MOTION_SEC = 9;
-
 /**
  * 鳥の絵（3枚の SVG を重ねた HTML の文字列）
- * @param seed カードごとに動きのタイミングをずらすための数
+ * @param seed カードごとに違う数。描き直したあとも「どの鳥が動いている途中か」を見分けるのに使う（birdMotion.ts）
  */
 export function birdSVG(color: GemColor, level: number, seed = 0): string {
   const s = SPECIES[color][Math.min(3, Math.max(1, level)) - 1]!;
@@ -147,8 +144,16 @@ export function birdSVG(color: GemColor, level: number, seed = 0): string {
     ? `<path d="M79,62 Q96,84 ${(tx + 6).toFixed(1)},${(ty - 6).toFixed(1)}" stroke="${s.tail}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
 <path d="M79,62 Q94,88 ${(tx - 2).toFixed(1)},${(ty + 6).toFixed(1)}" stroke="${s.tail}" stroke-width="2.2" fill="none" stroke-linecap="round"/>` : '';
 
-  // 画面を描き直しても動きが途中から続くように、今の時刻から動きの位置を決める
-  const delay = -((Date.now() / 1000 + jitter(seed + 7) * MOTION_SEC) % MOTION_SEC);
+  // 色の境目をやわらかくする。ぼかしのフィルターはスマホでは重く、発熱の原因になるので、
+  // 「まわりが透明になっていくグラデーション」を塗った楕円で代わりにする
+  let softN = 0;
+  const soft = (cx: number, cy: number, rx: number, ry: number, color: string, edge: number): string => {
+    const id = `${p}s${softN++}`;
+    const r = Math.min(rx, ry);
+    const inner = Math.max(0, r - edge) / (r + edge);
+    return `<radialGradient id="${id}"><stop offset="${inner.toFixed(2)}" stop-color="${color}"/><stop offset="${((inner + 1) / 2).toFixed(2)}" stop-color="${color}" stop-opacity=".5"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></radialGradient>`
+      + `<ellipse cx="${cx}" cy="${cy}" rx="${rx + edge}" ry="${ry + edge}" fill="url(#${id})"/>`;
+  };
   const vb = 'viewBox="14 1 106 94" preserveAspectRatio="xMidYMid meet"';
 
   // 奥：影と尾（枝の向こうへ垂れる）
@@ -178,27 +183,21 @@ ${streamers}
 <linearGradient id="${p}sd" x1="0" y1="0" x2=".3" y2="1"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></linearGradient>
 <linearGradient id="${p}wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.wing}"/><stop offset=".55" stop-color="${s.wing}"/><stop offset="1" stop-color="${s.primaries}"/></linearGradient>
 <radialGradient id="${p}ey" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#3a3a3a"/><stop offset="1" stop-color="#050505"/></radialGradient>
-<filter id="${p}sf" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.3"/></filter>
-<filter id="${p}sf2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".45"/></filter>
 <clipPath id="${p}c"><path d="${body}"/></clipPath>
 </defs>
 <path d="${body}" fill="${s.back}" stroke="rgba(0,0,0,.35)" stroke-width=".6"/>
 <g clip-path="url(#${p}c)">
 <rect x="0" y="0" width="140" height="100" fill="url(#${p}bk)"/>
-<g filter="url(#${p}sf)">
-<path d="M18,44 L33,50 C38,62 52,71 80,67 L92,110 L0,110 Z" fill="${s.belly}"/>
-${s.flank ? `<ellipse cx="53" cy="65" rx="8" ry="7" fill="${s.flank}"/>` : ''}
-<ellipse cx="37" cy="44" rx="11.5" ry="13" fill="${s.breast}"/>
-${s.throat ? `<ellipse cx="33" cy="33" rx="6" ry="5.5" fill="${s.throat}"/>` : ''}
-${s.crown ? `<ellipse cx="44" cy="15" rx="12" ry="6" fill="${s.crown}"/>` : ''}
-${s.face ? `<ellipse cx="38" cy="23" rx="7.5" ry="5.5" fill="${s.face}"/>` : ''}
-</g>
-<g filter="url(#${p}sf2)">
-${s.cheek ? `<ellipse cx="39" cy="29.5" rx="7" ry="3" fill="${s.cheek}"/>` : ''}
+<path d="M18,44 L33,50 C38,62 52,71 80,67 L92,110 L0,110 Z" fill="${s.belly}" stroke="${s.belly}" stroke-width="3" stroke-opacity=".4"/>
+${s.flank ? soft(53, 65, 8, 7, s.flank, 2) : ''}
+${soft(37, 44, 11.5, 13, s.breast, 2)}
+${s.throat ? soft(33, 33, 6, 5.5, s.throat, 2) : ''}
+${s.crown ? soft(44, 15, 12, 6, s.crown, 2) : ''}
+${s.face ? soft(38, 23, 7.5, 5.5, s.face, 2) : ''}
+${s.cheek ? soft(39, 29.5, 7, 3, s.cheek, 0.8) : ''}
 ${s.mask ? `<path d="M26,21 Q37,16.5 50,22 Q39,26.5 26,27 Z" fill="${s.mask}"/>` : ''}
 ${s.brow ? `<path d="M31,17.5 Q40,14 50.5,18" stroke="${s.brow}" stroke-width="1.6" fill="none"/>` : ''}
 ${spots}
-</g>
 <path d="${BREAST_STROKES}" stroke="rgba(0,0,0,.09)" stroke-width=".5" fill="none"/>
 <path d="M44,18 q3,1 6,0 M47,22 q3,1.4 6,.6 M55,30 q4,2 8,1.5 M60,36 q4,2 8,1.5" stroke="rgba(255,255,255,.22)" stroke-width=".6" fill="none"/>
 <rect x="0" y="0" width="140" height="100" fill="url(#${p}hl)"/>
@@ -209,7 +208,7 @@ ${s.crest ? `<path d="M39,15.5 Q43,0 54,3 Q50,10 54.5,22 Z" fill="${s.crown ?? s
 <path d="M47,31 C58,29.5 70,40 78,57 L87,76 C76,74.5 64,68.5 56,60 C49,52 45,42 47,31 Z" fill="url(#${p}wg)"/>
 <path d="${SCALLOPS}" stroke="rgba(0,0,0,.28)" stroke-width=".6" fill="none"/>
 <path d="${SCALLOPS}" stroke="rgba(255,255,255,.18)" stroke-width=".5" fill="none" transform="translate(0,-.8)"/>
-${s.wingbar ? `<path d="M51,46 Q60,50 67,58" stroke="${s.wingbar}" stroke-width="2.2" fill="none" stroke-linecap="round" filter="url(#${p}sf2)"/>` : ''}
+${s.wingbar ? `<path d="M51,46 Q60,50 67,58" stroke="${s.wingbar}" stroke-width="2.2" fill="none" stroke-linecap="round"/>` : ''}
 <g stroke="rgba(0,0,0,.4)" stroke-width=".65" fill="none"><path d="M68,55 L86.5,75.5"/><path d="M66,58.5 L83.5,76"/><path d="M64,61.5 L80,75.5"/><path d="M62,64 L76,74"/></g>
 <path d="M69,54 L86,73" stroke="rgba(255,255,255,.16)" stroke-width=".55"/>
 <g transform="${beakT}"><path d="${up}" fill="${s.beakColor}"/><path d="${low}" fill="${s.beakLower ?? s.beakColor}" opacity="${s.beakLower ? 1 : 0.82}"/>
@@ -218,5 +217,5 @@ ${s.eyeRing ? `<circle cx="37.5" cy="21.5" r="3.9" fill="${s.eyeRing}"/>` : ''}
 <circle cx="37.5" cy="21.5" r="2.6" fill="url(#${p}ey)"/><circle cx="36.6" cy="20.6" r=".85" fill="#fff" opacity=".95"/>
 </svg>`;
 
-  return `<span class="bird3d" style="--bd:${delay.toFixed(2)}s" aria-hidden="true">${back}${mid}${front}</span>`;
+  return `<span class="bird3d" data-bird="${color}${level}-${seed}" aria-hidden="true">${back}${mid}${front}</span>`;
 }
